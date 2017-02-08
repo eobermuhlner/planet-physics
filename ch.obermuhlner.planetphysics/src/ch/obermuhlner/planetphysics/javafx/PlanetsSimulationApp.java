@@ -153,4 +153,8 @@ public class PlanetsSimulationApp extends Application {
 	private void simulateStep() {
 		simulation.simulateStep(deltaTimeProperty.get());
 	}
+
+	public static void main(String[] args) {
+		launch(args);
+	}
 }
