@@ -33,29 +33,33 @@ public class PlanetsSimulationApp extends Application {
 
 	private final Simulation simulation = new Simulation();
 
-	private DoubleProperty deltaTimeProperty = new SimpleDoubleProperty(5.0);
+	private DoubleProperty deltaTimeProperty = new SimpleDoubleProperty(1.0);
 	private DoubleProperty zoomProperty = new SimpleDoubleProperty(1.0);
 
 	private Canvas simulationCanvas;
 	
 	public PlanetsSimulationApp() {
 
-		simulation.planets.add(new Planet(Vector2.of(0, 0), Vector2.of(0, 0), 30.0));
+		Planet central = new Planet(Vector2.of(0, 0), Vector2.of(0, 0), 1000.0);
+		simulation.planets.add(central);
 
-		simulation.planets.add(new Planet(Vector2.of(0, 100), Vector2.of(-2, 0), 1.0));
-		simulation.planets.add(new Planet(Vector2.of(0, 200), Vector2.of(-1.2, 0), 1.0));
-		simulation.planets.add(new Planet(Vector2.of(0, -300), Vector2.of(1.0, 0), 1.0));
+		simulation.planets.add(createOrbitingPlanet(central, 100, 10));
+		simulation.planets.add(createOrbitingPlanet(central, 200, 1));
+		simulation.planets.add(createOrbitingPlanet(central, 300, 10));
 		
 //		for (int i = 0; i < 100; i++) {
-//			Vector2 position = Vector2.of(random(-300, 300), random(-300, 300));
-//			//Vector2 speed = Vector2.of(random(-1, 1), random(-1, 1));
-//			Vector2 speed = Vector2.ofPolar(position.getAngle()+Math.PI*0.5, random(1.0, 2.0));
-//			simulation.planets.add(new Planet(position, speed, random(0.01, 0.02)));
+//			simulation.planets.add(createOrbitingPlanet(central, random(100, 600), random(0.1, 0.2)));
 //		}
 	}
 	
 	private double random(double min, double max) {
 		return random.nextDouble() * (max - min) + min;
+	}
+	
+	private Planet createOrbitingPlanet(Planet central, double orbitRadius, double mass) {
+		Vector2 position = central.getPosition().add(Vector2.of(0, orbitRadius));
+		Vector2 speed = Vector2.of(Math.sqrt(Simulation.GRAVITY * (mass + central.getMass()) / orbitRadius), 0);
+		return new Planet(position, speed, mass);
 	}
 	
 	@Override
