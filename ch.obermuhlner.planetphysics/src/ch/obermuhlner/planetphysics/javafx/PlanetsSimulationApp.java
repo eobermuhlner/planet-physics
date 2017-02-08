@@ -19,7 +19,6 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.Button;
 import javafx.scene.control.Slider;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
@@ -36,6 +35,9 @@ public class PlanetsSimulationApp extends Application {
 	private DoubleProperty deltaTimeProperty = new SimpleDoubleProperty(1.0);
 	private DoubleProperty zoomProperty = new SimpleDoubleProperty(1.0);
 
+	private double translateXProperty = 0;
+	private double translateYProperty = 0;
+	
 	private Canvas simulationCanvas;
 	
 	public PlanetsSimulationApp() {
@@ -79,6 +81,7 @@ public class PlanetsSimulationApp extends Application {
         simulationCanvas = createSimulationCanvas();
 		mainBorderPane.setCenter(simulationCanvas);
 		setupSimulationRendering();
+		setupSimulationDragging();
         
 		primaryStage.setScene(scene);
         primaryStage.show();
@@ -98,6 +101,33 @@ public class PlanetsSimulationApp extends Application {
 			}
 		}));
 		timeline.playFromStart();
+	}
+	
+	private double lastMouseDragX;
+	private double lastMouseDragY;
+	private void setupSimulationDragging() {
+		simulationCanvas.setOnMousePressed(event -> {
+			lastMouseDragX = event.getX();
+			lastMouseDragY = event.getY();
+		});
+		simulationCanvas.setOnMouseDragged(event -> {
+			double deltaX = event.getX() - lastMouseDragX;
+			double deltaY = event.getY() - lastMouseDragY;
+			lastMouseDragX = event.getX();
+			lastMouseDragY = event.getY();
+			
+			translateXProperty += deltaX;
+			translateYProperty += deltaY;
+		});
+		simulationCanvas.setOnMouseReleased(event -> {
+			double deltaX = event.getX() - lastMouseDragX;
+			double deltaY = event.getY() - lastMouseDragY;
+			lastMouseDragX = event.getX();
+			lastMouseDragY = event.getY();
+			
+			translateXProperty += deltaX;
+			translateYProperty += deltaY;
+		});
 	}
 
 	private Node createToolbar() {
@@ -147,12 +177,12 @@ public class PlanetsSimulationApp extends Application {
 
 	private double toScreenX(double x) {
 		double zoomFactor = Math.pow(10.0, zoomProperty.get());
-		return x / zoomFactor + simulationCanvas.getWidth() / 2;
+		return x / zoomFactor + simulationCanvas.getWidth() / 2 + translateXProperty;
 	}
 
 	private double toScreenY(double y) {
 		double zoomFactor = Math.pow(10.0, zoomProperty.get());
-		return y / zoomFactor + simulationCanvas.getHeight() / 2;
+		return y / zoomFactor + simulationCanvas.getHeight() / 2  + translateYProperty;
 	}
 
 	private double toScreenPixels(double x) {
