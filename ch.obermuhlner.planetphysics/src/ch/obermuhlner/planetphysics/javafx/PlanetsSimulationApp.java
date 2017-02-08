@@ -40,15 +40,18 @@ public class PlanetsSimulationApp extends Application {
 	
 	public PlanetsSimulationApp() {
 
-		Planet central = new Planet(Vector2.of(0, 0), Vector2.of(0, 0), 1000.0);
+		Planet central = new Planet(Vector2.of(0, 0), Vector2.of(0, 0), 1000.0, Color.YELLOW.getHue());
 		simulation.planets.add(central);
 
-		simulation.planets.add(createOrbitingPlanet(central, 100, 10));
-		simulation.planets.add(createOrbitingPlanet(central, 200, 1));
-		simulation.planets.add(createOrbitingPlanet(central, 300, 10));
+		simulation.planets.add(createOrbitingPlanet(central, 100, 10, Color.GREEN.getHue()));
+		simulation.planets.add(createOrbitingPlanet(central, 200, 1, Color.MAGENTA.getHue()));
+		simulation.planets.add(createOrbitingPlanet(central, 300, 10, Color.BLUE.getHue()));
 		
 //		for (int i = 0; i < 100; i++) {
-//			simulation.planets.add(createOrbitingPlanet(central, random(100, 600), random(0.1, 0.2)));
+//			double orbitRadius = random(100, 600);
+//			double mass = random(0.0, 0.1);
+//			double hue = Color.RED.getHue() + mass * 200;
+//			simulation.planets.add(createOrbitingPlanet(central, orbitRadius, mass, hue));
 //		}
 	}
 	
@@ -56,10 +59,11 @@ public class PlanetsSimulationApp extends Application {
 		return random.nextDouble() * (max - min) + min;
 	}
 	
-	private Planet createOrbitingPlanet(Planet central, double orbitRadius, double mass) {
-		Vector2 position = central.getPosition().add(Vector2.of(0, orbitRadius));
-		Vector2 speed = Vector2.of(Math.sqrt(Simulation.GRAVITY * (mass + central.getMass()) / orbitRadius), 0);
-		return new Planet(position, speed, mass);
+	private Planet createOrbitingPlanet(Planet central, double orbitRadius, double mass, double hue) {
+		double angle = random(0, 2*Math.PI);
+		Vector2 position = central.getPosition().add(Vector2.ofPolar(angle, orbitRadius));
+		Vector2 speed = Vector2.ofPolar(angle + Math.PI*0.5, Math.sqrt(Simulation.GRAVITY * (mass + central.getMass()) / orbitRadius));
+		return new Planet(position, speed, mass, hue);
 	}
 	
 	@Override
@@ -124,12 +128,13 @@ public class PlanetsSimulationApp extends Application {
 		graphics.fillRect(0, 0, graphics.getCanvas().getWidth(), graphics.getCanvas().getHeight());
 		
 		for (Planet planet : simulation.planets) {
-			graphics.setFill(Color.RED);
+			Color color = Color.hsb(planet.getHue(), 1.0, 1.0);
+			graphics.setFill(color);
 			double radiusScreenPixels = toScreenPixels(planet.getRadius());
 			Vector2 position = planet.getPosition();
 			graphics.fillOval(toScreenX(position.x)-radiusScreenPixels/2, toScreenY(position.y)-radiusScreenPixels/2, radiusScreenPixels, radiusScreenPixels);
 
-			Color tailColor = Color.WHITE;
+			Color tailColor = color;
 			for (Vector2 tailPosition : planet.getOldPositions()) {
 				graphics.setStroke(tailColor);
 				graphics.strokeLine(toScreenX(position.x), toScreenY(position.y), toScreenX(tailPosition.x), toScreenY(tailPosition.y));
