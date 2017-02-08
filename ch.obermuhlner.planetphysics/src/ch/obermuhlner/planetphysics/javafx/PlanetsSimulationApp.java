@@ -8,13 +8,19 @@ import ch.obermuhlner.planetphysics.math.Vector2;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Button;
+import javafx.scene.control.Slider;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.paint.Color;
@@ -25,9 +31,12 @@ public class PlanetsSimulationApp extends Application {
 
 	private Random random = new Random();
 
-	private double deltaTime = 5.0;
-	
 	private final Simulation simulation = new Simulation();
+
+	private DoubleProperty deltaTimeProperty = new SimpleDoubleProperty(5.0);
+	private DoubleProperty zoomProperty = new SimpleDoubleProperty(1.0);
+
+	private Canvas simulationCanvas;
 	
 	public PlanetsSimulationApp() {
 
@@ -57,16 +66,18 @@ public class PlanetsSimulationApp extends Application {
         BorderPane mainBorderPane = new BorderPane();
         root.getChildren().add(mainBorderPane);
         
-        // tool bar
-        FlowPane toolbarFlowPane = new FlowPane(Orientation.HORIZONTAL);
-        mainBorderPane.setTop(toolbarFlowPane);
+        mainBorderPane.setTop(createToolbar());
         
+        simulationCanvas = createSimulationCanvas();
+		mainBorderPane.setCenter(simulationCanvas);
+		setupSimulationRendering();
         
-        
-        // canvas
-        Canvas canvas = new Canvas(1200, 600);
-        mainBorderPane.setCenter(canvas);
-		GraphicsContext graphics = canvas.getGraphicsContext2D();
+		primaryStage.setScene(scene);
+        primaryStage.show();
+	}
+
+	private void setupSimulationRendering() {
+		GraphicsContext graphics = simulationCanvas.getGraphicsContext2D();
 		drawSimulator(graphics);
 		
 		Timeline timeline = new Timeline();
@@ -79,9 +90,29 @@ public class PlanetsSimulationApp extends Application {
 			}
 		}));
 		timeline.playFromStart();
+	}
 
-		primaryStage.setScene(scene);
-        primaryStage.show();
+	private Node createToolbar() {
+        FlowPane toolbarFlowPane = new FlowPane(Orientation.HORIZONTAL);
+        toolbarFlowPane.setHgap(4);
+        toolbarFlowPane.setVgap(4);
+
+//        Button runButton = new Button("Run");
+//        toolbarFlowPane.getChildren().add(runButton);
+//        
+//        Button stepButton = new Button("Step");
+//        toolbarFlowPane.getChildren().add(stepButton);
+        
+        Slider zoomSlider = new Slider(-2, 10.0, 0.0);
+        Bindings.bindBidirectional(zoomProperty, zoomSlider.valueProperty());
+        toolbarFlowPane.getChildren().add(zoomSlider);
+
+        return toolbarFlowPane;
+	}
+
+	private Canvas createSimulationCanvas() {
+        Canvas canvas = new Canvas(1200, 600);
+		return canvas;
 	}
 
 	private void drawSimulator(GraphicsContext graphics) {
@@ -106,18 +137,20 @@ public class PlanetsSimulationApp extends Application {
 	}
 
 	private double toScreenX(double x) {
-		return x * 1 + 600;
+		double zoomFactor = Math.pow(10.0, zoomProperty.get());
+		return x / zoomFactor + simulationCanvas.getWidth() / 2;
 	}
 
 	private double toScreenY(double y) {
-		return y * 1 + 300;
+		double zoomFactor = Math.pow(10.0, zoomProperty.get());
+		return y / zoomFactor + simulationCanvas.getHeight() / 2;
 	}
 
 	private double toScreenPixels(double x) {
-		return x * 10;
+		return x;
 	}
 
 	private void simulateStep() {
-		simulation.simulateStep(deltaTime);
+		simulation.simulateStep(deltaTimeProperty.get());
 	}
 }
