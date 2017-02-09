@@ -19,6 +19,8 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
@@ -39,6 +41,7 @@ public class PlanetsSimulationApp extends Application {
 	private double translateYProperty = 0;
 	
 	private Canvas simulationCanvas;
+	Timeline simulationTimeline = new Timeline();
 	
 	public PlanetsSimulationApp() {
 
@@ -91,16 +94,15 @@ public class PlanetsSimulationApp extends Application {
 		GraphicsContext graphics = simulationCanvas.getGraphicsContext2D();
 		drawSimulator(graphics);
 		
-		Timeline timeline = new Timeline();
-		timeline.setCycleCount(Timeline.INDEFINITE);
-		timeline.getKeyFrames().add(new KeyFrame(Duration.millis(50), new EventHandler<ActionEvent>() {
+		simulationTimeline.setCycleCount(Timeline.INDEFINITE);
+		simulationTimeline.getKeyFrames().add(new KeyFrame(Duration.millis(50), new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
 				simulateStep();
 				drawSimulator(graphics);
 			}
 		}));
-		timeline.playFromStart();
+		simulationTimeline.play();
 	}
 	
 	private double lastMouseDragX;
@@ -135,17 +137,50 @@ public class PlanetsSimulationApp extends Application {
         toolbarFlowPane.setHgap(4);
         toolbarFlowPane.setVgap(4);
 
-//        Button runButton = new Button("Run");
-//        toolbarFlowPane.getChildren().add(runButton);
-//        
-//        Button stepButton = new Button("Step");
-//        toolbarFlowPane.getChildren().add(stepButton);
-        
-        Slider zoomSlider = new Slider(-2, 10.0, 0.0);
-        Bindings.bindBidirectional(zoomProperty, zoomSlider.valueProperty());
-        toolbarFlowPane.getChildren().add(zoomSlider);
+        Button runButton = new Button("Run");
+        Button stopButton = new Button("Stop");
+        Button stepButton = new Button("Step");
 
+        updateRunButtons(runButton, stopButton, stepButton, true);
+
+        toolbarFlowPane.getChildren().add(runButton);
+        runButton.addEventHandler(ActionEvent.ACTION, event -> {
+            simulationTimeline.play();
+            updateRunButtons(runButton, stopButton, stepButton, true);
+        });
+
+        toolbarFlowPane.getChildren().add(stopButton);
+        stopButton.addEventHandler(ActionEvent.ACTION, event -> {
+            simulationTimeline.stop();
+            updateRunButtons(runButton, stopButton, stepButton, false);
+        });
+
+        toolbarFlowPane.getChildren().add(stepButton);
+        stepButton.addEventHandler(ActionEvent.ACTION, event -> {
+        	simulateStep();
+    		GraphicsContext graphics = simulationCanvas.getGraphicsContext2D();
+    		drawSimulator(graphics);
+        });
+        
+        toolbarFlowPane.getChildren().add(new Label("Zoom:"));
+        Slider zoomSlider = new Slider(-2.0, 2.0, 0.0);
+        zoomSlider.setShowTickMarks(true);
+        zoomSlider.setShowTickLabels(true);
+        zoomSlider.setMajorTickUnit(1.0f);
+        toolbarFlowPane.getChildren().add(zoomSlider);
+        Bindings.bindBidirectional(zoomProperty, zoomSlider.valueProperty());
+        zoomSlider.valueProperty().addListener(event -> {
+    		GraphicsContext graphics = simulationCanvas.getGraphicsContext2D();
+    		drawSimulator(graphics);
+        });
+        
         return toolbarFlowPane;
+	}
+
+	private void updateRunButtons(Button runButton, Button stopButton, Button stepButton, boolean running) {
+		runButton.setDisable(running);
+    	stopButton.setDisable(!running);
+    	stepButton.setDisable(running);
 	}
 
 	private Canvas createSimulationCanvas() {
