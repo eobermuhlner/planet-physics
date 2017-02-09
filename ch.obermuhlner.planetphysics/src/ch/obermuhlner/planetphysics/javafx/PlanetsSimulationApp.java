@@ -52,12 +52,13 @@ public class PlanetsSimulationApp extends Application {
 		simulation.planets.add(createOrbitingPlanet(central, 200, 1, Color.MAGENTA.getHue()));
 		simulation.planets.add(createOrbitingPlanet(central, 300, 10, Color.BLUE.getHue()));
 		
-//		for (int i = 0; i < 100; i++) {
-//			double orbitRadius = random(100, 600);
-//			double mass = random(0.0, 0.1);
-//			double hue = Color.RED.getHue() + mass * 200;
-//			simulation.planets.add(createOrbitingPlanet(central, orbitRadius, mass, hue));
-//		}
+		for (int i = 0; i < 100; i++) {
+			double orbitRadius = random(100, 1000);
+			double r = random(0.0, 1.0);
+			double mass = 1.0;
+			double hue = Color.RED.getHue() + r * 50;
+			simulation.planets.add(createOrbitingPlanet(central, orbitRadius, mass, hue));
+		}
 	}
 	
 	private double random(double min, double max) {
