@@ -8,7 +8,7 @@ import ch.obermuhlner.planetphysics.math.Vector2;
 
 public class Planet {
 
-	private static final int TAIL_LENGTH = 100;
+	public static final int TAIL_LENGTH = 100;
 	
 	private Vector2 position;
 	private Vector2 speed;
