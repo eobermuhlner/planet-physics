@@ -11,8 +11,10 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.Property;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -24,6 +26,7 @@ import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
@@ -53,6 +56,7 @@ public class PlanetsSimulationApp extends Application {
 	private DoubleProperty planetSpeedYProperty = new SimpleDoubleProperty();
 	private DoubleProperty planetMassProperty = new SimpleDoubleProperty();
 	private DoubleProperty planetHueProperty = new SimpleDoubleProperty();
+	private BooleanProperty planetOrbitProperty = new SimpleBooleanProperty(true);
 
 	private DoubleProperty planetMinPositionXProperty = new SimpleDoubleProperty(-300);
 	private DoubleProperty planetMinPositionYProperty = new SimpleDoubleProperty(-300);
@@ -65,6 +69,8 @@ public class PlanetsSimulationApp extends Application {
 	private DoubleProperty planetMaxSpeedXProperty = new SimpleDoubleProperty(2);
 	private DoubleProperty planetMaxSpeedYProperty = new SimpleDoubleProperty(2);
 	private DoubleProperty planetMaxMassProperty = new SimpleDoubleProperty(2);
+	
+	private double totalMass;
 
 	private double translateXProperty = 0;
 	private double translateYProperty = 0;
@@ -75,18 +81,18 @@ public class PlanetsSimulationApp extends Application {
 	public PlanetsSimulationApp() {
 
 		Planet central = new Planet(Vector2.of(0, 0), Vector2.of(0, 0), 1000.0, Color.YELLOW.getHue());
-		simulation.planets.add(central);
+		addPlanet(central);
 
-		simulation.planets.add(createOrbitingPlanet(central, 100, 10, Color.GREEN.getHue()));
-		simulation.planets.add(createOrbitingPlanet(central, 200, 1, Color.MAGENTA.getHue()));
-		simulation.planets.add(createOrbitingPlanet(central, 300, 10, Color.BLUE.getHue()));
+		addPlanet(createOrbitingPlanet(central, 100, 10, Color.GREEN.getHue()));
+		addPlanet(createOrbitingPlanet(central, 200, 1, Color.MAGENTA.getHue()));
+		addPlanet(createOrbitingPlanet(central, 300, 10, Color.BLUE.getHue()));
 		
 		for (int i = 0; i < 100; i++) {
 			double orbitRadius = random(100, 1000);
 			double r = random(0.0, 1.0);
 			double mass = 1.0;
 			double hue = Color.RED.getHue() + r * 50;
-			simulation.planets.add(createOrbitingPlanet(central, orbitRadius, mass, hue));
+			addPlanet(createOrbitingPlanet(central, orbitRadius, mass, hue));
 		}
 	}
 	
@@ -97,8 +103,18 @@ public class PlanetsSimulationApp extends Application {
 	private Planet createOrbitingPlanet(Planet central, double orbitRadius, double mass, double hue) {
 		double angle = random(0, 2*Math.PI);
 		Vector2 position = central.getPosition().add(Vector2.ofPolar(angle, orbitRadius));
-		Vector2 speed = Vector2.ofPolar(angle + Math.PI*0.5, Math.sqrt(Simulation.GRAVITY * (mass + central.getMass()) / orbitRadius));
+		Vector2 speed = Vector2.ofPolar(angle + Math.PI*0.5, Math.sqrt(Simulation.GRAVITY * (mass + totalMass) / orbitRadius));
 		return new Planet(position, speed, mass, hue);
+	}
+	
+	public void clearPlanets() {
+		simulation.planets.clear();
+		totalMass = 0;
+	}
+	
+	public void addPlanet(Planet planet) {
+		simulation.planets.add(planet);
+		totalMass += planet.getMass();
 	}
 	
 	@Override
@@ -223,35 +239,45 @@ public class PlanetsSimulationApp extends Application {
     	Button clearButton = new Button("Clear");
     	gridPane.add(clearButton, 0, rowIndex++);
         clearButton.addEventHandler(ActionEvent.ACTION, event -> {
-        	simulation.planets.clear();
+        	clearPlanets();
         	drawSimulator();
         });
 
         addLabels(gridPane, rowIndex++, null, "Value", "Min", "Max");
+        addTextField(gridPane, rowIndex++, "Mass", DOUBLE_FORMAT, planetMassProperty, planetMinMassProperty, planetMaxMassProperty);
+    	addHueSlider(gridPane, rowIndex++, "Color", planetHueProperty);
     	addTextField(gridPane, rowIndex++, "Position x", DOUBLE_FORMAT, planetPositionXProperty, planetMinPositionXProperty, planetMaxPositionXProperty);
     	addTextField(gridPane, rowIndex++, "Position y", DOUBLE_FORMAT, planetPositionYProperty, planetMinPositionYProperty, planetMaxPositionYProperty);
+        addCheckBox(gridPane, rowIndex++, "Orbit", planetOrbitProperty);
     	addTextField(gridPane, rowIndex++, "Speed x", DOUBLE_FORMAT, planetSpeedXProperty, planetMinSpeedXProperty, planetMaxSpeedXProperty);
     	addTextField(gridPane, rowIndex++, "Speed y", DOUBLE_FORMAT, planetSpeedYProperty, planetMinSpeedYProperty, planetMaxSpeedYProperty);
-    	addTextField(gridPane, rowIndex++, "Mass", DOUBLE_FORMAT, planetMassProperty, planetMinMassProperty, planetMaxMassProperty);
-    	addHueSlider(gridPane, rowIndex++, "Color", planetHueProperty);
 
 
     	Button newButton = new Button("Random");
     	gridPane.add(newButton, 0, rowIndex);
         newButton.addEventHandler(ActionEvent.ACTION, event -> {
+        	planetMassProperty.set(random(planetMinMassProperty.get(), planetMaxMassProperty.get()));
         	planetPositionXProperty.set(random(planetMinPositionXProperty.get(), planetMaxPositionXProperty.get()));
         	planetPositionYProperty.set(random(planetMinPositionYProperty.get(), planetMaxPositionYProperty.get()));
         	planetSpeedXProperty.set(random(planetMinSpeedXProperty.get(), planetMaxSpeedXProperty.get()));
         	planetSpeedYProperty.set(random(planetMinSpeedYProperty.get(), planetMaxSpeedYProperty.get()));
-        	planetMassProperty.set(random(planetMinMassProperty.get(), planetMaxMassProperty.get()));
         	planetHueProperty.set(random(0.0, 360.0));
 
+        	Vector2 position = Vector2.of(planetPositionXProperty.get(), planetPositionYProperty.get());
+        	double mass = planetMassProperty.get();
+    		Vector2 speed;
+    		if (planetOrbitProperty.get()) {
+    			speed = Vector2.ofPolar(position.getAngle() + Math.PI*0.5, Math.sqrt(Simulation.GRAVITY * (mass + totalMass) / position.getLength()));
+    		} else {
+    			speed = Vector2.of(planetSpeedXProperty.get(), planetSpeedYProperty.get());
+    		}
+
         	Planet planet = new Planet(
-        			Vector2.of(planetPositionXProperty.get(), planetPositionYProperty.get()),
-        			Vector2.of(planetSpeedXProperty.get(), planetSpeedYProperty.get()),
-        			planetMassProperty.get(),
+        			position,
+        			speed,
+        			mass,
         			planetHueProperty.get());
-        	simulation.planets.add(planet);
+        	addPlanet(planet);
         	drawSimulator();
         });
 
@@ -263,7 +289,7 @@ public class PlanetsSimulationApp extends Application {
         			Vector2.of(planetSpeedXProperty.get(), planetSpeedYProperty.get()),
         			planetMassProperty.get(),
         			planetHueProperty.get());
-        	simulation.planets.add(planet);
+        	addPlanet(planet);
         	drawSimulator();
         });    	
     	
@@ -291,6 +317,15 @@ public class PlanetsSimulationApp extends Application {
 			Bindings.bindBidirectional(valueTextField.textProperty(), property, format);
 			gridPane.add(valueTextField, i+1, rowIndex);
 		}
+	}
+
+	private CheckBox addCheckBox(GridPane gridPane, int rowIndex, String label, BooleanProperty booleanProperty) {
+        gridPane.add(new Text(label), 0, rowIndex);
+        
+        CheckBox valueCheckBox = new CheckBox();
+        Bindings.bindBidirectional(booleanProperty, valueCheckBox.selectedProperty());
+		gridPane.add(valueCheckBox, 1, rowIndex);
+		return valueCheckBox;
 	}
 
 	private Slider addHueSlider(GridPane gridPane, int rowIndex, String label, DoubleProperty doubleProperty) {
