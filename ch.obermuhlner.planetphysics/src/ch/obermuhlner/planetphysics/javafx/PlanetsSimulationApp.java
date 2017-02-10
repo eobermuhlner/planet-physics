@@ -1,5 +1,7 @@
 package ch.obermuhlner.planetphysics.javafx;
 
+import java.text.DecimalFormat;
+import java.text.Format;
 import java.util.Random;
 
 import ch.obermuhlner.planetphysics.Planet;
@@ -10,9 +12,11 @@ import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.Property;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -22,13 +26,19 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
 public class PlanetsSimulationApp extends Application {
+
+	private static final DecimalFormat DOUBLE_FORMAT = new DecimalFormat("##0.000");
 
 	private Random random = new Random();
 
@@ -36,6 +46,25 @@ public class PlanetsSimulationApp extends Application {
 
 	private DoubleProperty deltaTimeProperty = new SimpleDoubleProperty(1.0);
 	private DoubleProperty zoomProperty = new SimpleDoubleProperty(1.0);
+
+	private DoubleProperty planetPositionXProperty = new SimpleDoubleProperty();
+	private DoubleProperty planetPositionYProperty = new SimpleDoubleProperty();
+	private DoubleProperty planetSpeedXProperty = new SimpleDoubleProperty();
+	private DoubleProperty planetSpeedYProperty = new SimpleDoubleProperty();
+	private DoubleProperty planetMassProperty = new SimpleDoubleProperty();
+	private DoubleProperty planetHueProperty = new SimpleDoubleProperty();
+
+	private DoubleProperty planetMinPositionXProperty = new SimpleDoubleProperty(-300);
+	private DoubleProperty planetMinPositionYProperty = new SimpleDoubleProperty(-300);
+	private DoubleProperty planetMinSpeedXProperty = new SimpleDoubleProperty(-2);
+	private DoubleProperty planetMinSpeedYProperty = new SimpleDoubleProperty(-2);
+	private DoubleProperty planetMinMassProperty = new SimpleDoubleProperty(0);
+
+	private DoubleProperty planetMaxPositionXProperty = new SimpleDoubleProperty(300);
+	private DoubleProperty planetMaxPositionYProperty = new SimpleDoubleProperty(300);
+	private DoubleProperty planetMaxSpeedXProperty = new SimpleDoubleProperty(2);
+	private DoubleProperty planetMaxSpeedYProperty = new SimpleDoubleProperty(2);
+	private DoubleProperty planetMaxMassProperty = new SimpleDoubleProperty(2);
 
 	private double translateXProperty = 0;
 	private double translateYProperty = 0;
@@ -82,6 +111,8 @@ public class PlanetsSimulationApp extends Application {
         
         mainBorderPane.setTop(createToolbar());
         
+        mainBorderPane.setRight(createEditor());
+        
         simulationCanvas = createSimulationCanvas();
 		mainBorderPane.setCenter(simulationCanvas);
 		setupSimulationRendering();
@@ -92,15 +123,14 @@ public class PlanetsSimulationApp extends Application {
 	}
 
 	private void setupSimulationRendering() {
-		GraphicsContext graphics = simulationCanvas.getGraphicsContext2D();
-		drawSimulator(graphics);
+		drawSimulator();
 		
 		simulationTimeline.setCycleCount(Timeline.INDEFINITE);
 		simulationTimeline.getKeyFrames().add(new KeyFrame(Duration.millis(50), new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
 				simulateStep();
-				drawSimulator(graphics);
+				drawSimulator();
 			}
 		}));
 		simulationTimeline.play();
@@ -159,8 +189,7 @@ public class PlanetsSimulationApp extends Application {
         toolbarFlowPane.getChildren().add(stepButton);
         stepButton.addEventHandler(ActionEvent.ACTION, event -> {
         	simulateStep();
-    		GraphicsContext graphics = simulationCanvas.getGraphicsContext2D();
-    		drawSimulator(graphics);
+    		drawSimulator();
         });
         
         toolbarFlowPane.getChildren().add(new Label("Zoom:"));
@@ -171,8 +200,7 @@ public class PlanetsSimulationApp extends Application {
         toolbarFlowPane.getChildren().add(zoomSlider);
         Bindings.bindBidirectional(zoomProperty, zoomSlider.valueProperty());
         zoomSlider.valueProperty().addListener(event -> {
-    		GraphicsContext graphics = simulationCanvas.getGraphicsContext2D();
-    		drawSimulator(graphics);
+    		drawSimulator();
         });
         
         return toolbarFlowPane;
@@ -183,13 +211,123 @@ public class PlanetsSimulationApp extends Application {
     	stopButton.setDisable(!running);
     	stepButton.setDisable(running);
 	}
+	
+	private Node createEditor() {
+		GridPane gridPane = new GridPane();
+        gridPane.setHgap(4);
+        gridPane.setVgap(4);
+        BorderPane.setMargin(gridPane, new Insets(4));
+
+        int rowIndex = 0;
+
+    	Button clearButton = new Button("Clear");
+    	gridPane.add(clearButton, 0, rowIndex++);
+        clearButton.addEventHandler(ActionEvent.ACTION, event -> {
+        	simulation.planets.clear();
+        	drawSimulator();
+        });
+
+        addLabels(gridPane, rowIndex++, null, "Value", "Min", "Max");
+    	addTextField(gridPane, rowIndex++, "Position x", DOUBLE_FORMAT, planetPositionXProperty, planetMinPositionXProperty, planetMaxPositionXProperty);
+    	addTextField(gridPane, rowIndex++, "Position y", DOUBLE_FORMAT, planetPositionYProperty, planetMinPositionYProperty, planetMaxPositionYProperty);
+    	addTextField(gridPane, rowIndex++, "Speed x", DOUBLE_FORMAT, planetSpeedXProperty, planetMinSpeedXProperty, planetMaxSpeedXProperty);
+    	addTextField(gridPane, rowIndex++, "Speed y", DOUBLE_FORMAT, planetSpeedYProperty, planetMinSpeedYProperty, planetMaxSpeedYProperty);
+    	addTextField(gridPane, rowIndex++, "Mass", DOUBLE_FORMAT, planetMassProperty, planetMinMassProperty, planetMaxMassProperty);
+    	addHueSlider(gridPane, rowIndex++, "Color", planetHueProperty);
+
+
+    	Button newButton = new Button("Random");
+    	gridPane.add(newButton, 0, rowIndex);
+        newButton.addEventHandler(ActionEvent.ACTION, event -> {
+        	planetPositionXProperty.set(random(planetMinPositionXProperty.get(), planetMaxPositionXProperty.get()));
+        	planetPositionYProperty.set(random(planetMinPositionYProperty.get(), planetMaxPositionYProperty.get()));
+        	planetSpeedXProperty.set(random(planetMinSpeedXProperty.get(), planetMaxSpeedXProperty.get()));
+        	planetSpeedYProperty.set(random(planetMinSpeedYProperty.get(), planetMaxSpeedYProperty.get()));
+        	planetMassProperty.set(random(planetMinMassProperty.get(), planetMaxMassProperty.get()));
+        	planetHueProperty.set(random(0.0, 360.0));
+
+        	Planet planet = new Planet(
+        			Vector2.of(planetPositionXProperty.get(), planetPositionYProperty.get()),
+        			Vector2.of(planetSpeedXProperty.get(), planetSpeedYProperty.get()),
+        			planetMassProperty.get(),
+        			planetHueProperty.get());
+        	simulation.planets.add(planet);
+        	drawSimulator();
+        });
+
+    	Button okButton = new Button("Add");
+    	gridPane.add(okButton, 1, rowIndex++);
+        okButton.addEventHandler(ActionEvent.ACTION, event -> {
+        	Planet planet = new Planet(
+        			Vector2.of(planetPositionXProperty.get(), planetPositionYProperty.get()),
+        			Vector2.of(planetSpeedXProperty.get(), planetSpeedYProperty.get()),
+        			planetMassProperty.get(),
+        			planetHueProperty.get());
+        	simulation.planets.add(planet);
+        	drawSimulator();
+        });    	
+    	
+		return gridPane;
+	}
+
+	private void addLabels(GridPane gridPane, int rowIndex, String... labels) {
+		for (int i = 0; i < labels.length; i++) {
+			String label = labels[i];
+			if (label != null) {
+				gridPane.add(new Label(label), i, rowIndex);
+			}
+		}
+	}
+	
+	@SafeVarargs
+	private final <T> void addTextField(GridPane gridPane, int rowIndex, String label, Format format, Property<T>... properties) {
+		if (label != null) {
+			gridPane.add(new Text(label), 0, rowIndex);
+		}
+		for (int i = 0; i < properties.length; i++) {
+			Property<T> property = properties[i];
+
+			TextField valueTextField = new TextField();
+			Bindings.bindBidirectional(valueTextField.textProperty(), property, format);
+			gridPane.add(valueTextField, i+1, rowIndex);
+		}
+	}
+
+	private Slider addHueSlider(GridPane gridPane, int rowIndex, String label, DoubleProperty doubleProperty) {
+		Slider slider = addSlider(gridPane, rowIndex, label, doubleProperty, 0, 360, doubleProperty.get());
+        slider.setShowTickMarks(true);
+        slider.setMajorTickUnit(60.0f);
+		
+		Rectangle colorRectangle = new Rectangle();
+		colorRectangle.setWidth(20);
+		colorRectangle.setHeight(20);
+		doubleProperty.addListener((changeEvent) -> {
+			colorRectangle.setFill(Color.hsb(doubleProperty.get(), 1.0, 1.0));
+		});
+    	gridPane.add(colorRectangle, 2, rowIndex);
+		
+		return slider;
+	}
+
+	private Slider addSlider(GridPane gridPane, int rowIndex, String label, DoubleProperty doubleProperty, double min, double max, double value) {
+		if (label != null) {
+			gridPane.add(new Text(label), 0, rowIndex);
+		}
+        
+        Slider valueSlider = new Slider(min, max, value);
+        Bindings.bindBidirectional(doubleProperty, valueSlider.valueProperty());
+		gridPane.add(valueSlider, 1, rowIndex);
+		return valueSlider;
+	}
 
 	private Canvas createSimulationCanvas() {
         Canvas canvas = new Canvas(1200, 600);
 		return canvas;
 	}
 
-	private void drawSimulator(GraphicsContext graphics) {
+	private void drawSimulator() {
+		GraphicsContext graphics = simulationCanvas.getGraphicsContext2D();
+
 		graphics.setFill(Color.BLACK);
 		graphics.fillRect(0, 0, graphics.getCanvas().getWidth(), graphics.getCanvas().getHeight());
 		
