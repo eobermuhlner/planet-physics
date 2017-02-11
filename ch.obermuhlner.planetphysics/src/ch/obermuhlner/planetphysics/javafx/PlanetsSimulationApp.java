@@ -43,6 +43,8 @@ public class PlanetsSimulationApp extends Application {
 
 	private static final DecimalFormat DOUBLE_FORMAT = new DecimalFormat("##0.000");
 
+	private static final double TAIL_FACTOR = Math.pow(0.05, 1.0 / Planet.TAIL_LENGTH);
+	
 	private Random random = new Random();
 
 	private final Simulation simulation = new Simulation();
@@ -83,15 +85,17 @@ public class PlanetsSimulationApp extends Application {
 		Planet central = new Planet(Vector2.of(0, 0), Vector2.of(0, 0), 1000.0, Color.YELLOW.getHue());
 		addPlanet(central);
 
-		addPlanet(createOrbitingPlanet(central, 100, 10, Color.GREEN.getHue()));
-		addPlanet(createOrbitingPlanet(central, 200, 1, Color.MAGENTA.getHue()));
+//		addPlanet(createOrbitingPlanet(central, 100, 10, Color.GREEN.getHue()));
+//		addPlanet(createOrbitingPlanet(central, 200, 1, Color.MAGENTA.getHue()));
 		addPlanet(createOrbitingPlanet(central, 300, 10, Color.BLUE.getHue()));
+//		addPlanet(createOrbitingPlanet(central, 320, 1, Color.BLANCHEDALMOND.getHue()));
 		
-		for (int i = 0; i < 100; i++) {
-			double orbitRadius = random(100, 1000);
+		int n = 1000;
+		for (int i = 0; i < n; i++) {
+			double orbitRadius = 100.0 + i * 400.0 / n;
 			double r = random(0.0, 1.0);
-			double mass = 1.0;
-			double hue = Color.RED.getHue() + r * 50;
+			double mass = 0.0;
+			double hue = i * 360.0 / n;
 			addPlanet(createOrbitingPlanet(central, orbitRadius, mass, hue));
 		}
 	}
@@ -377,7 +381,7 @@ public class PlanetsSimulationApp extends Application {
 			for (Vector2 tailPosition : planet.getOldPositions()) {
 				graphics.setStroke(tailColor);
 				graphics.strokeLine(toScreenX(position.x), toScreenY(position.y), toScreenX(tailPosition.x), toScreenY(tailPosition.y));
-				tailColor = tailColor.deriveColor(0, 1.0, 0.98, 1.0);
+				tailColor = tailColor.deriveColor(0, 1.0, TAIL_FACTOR, 1.0);
 				
 				position = tailPosition;
 			}
