@@ -87,8 +87,8 @@ public class PlanetsSimulationApp extends Application {
 
 //		addPlanet(createOrbitingPlanet(central, 100, 10, Color.GREEN.getHue()));
 //		addPlanet(createOrbitingPlanet(central, 200, 1, Color.MAGENTA.getHue()));
-		addPlanet(createOrbitingPlanet(central, 300, 10, Color.BLUE.getHue()));
-//		addPlanet(createOrbitingPlanet(central, 320, 1, Color.BLANCHEDALMOND.getHue()));
+		addPlanet(createOrbitingPlanet(central, 500, 100, Color.BLANCHEDALMOND.getHue()));
+//		addPlanet(createOrbitingPlanet(central, 320, 1, Color.BLUE.getHue()));
 		
 		int n = 1000;
 		for (int i = 0; i < n; i++) {
@@ -370,20 +370,27 @@ public class PlanetsSimulationApp extends Application {
 		graphics.fillRect(0, 0, graphics.getCanvas().getWidth(), graphics.getCanvas().getHeight());
 		
 		for (Planet planet : simulation.getPlanets()) {
-			Color color = Color.hsb(planet.getHue(), 1.0, 1.0);
-			graphics.setFill(color);
-			double radiusScreenPixels = toScreenPixels(planet.getRadius());
-			Vector2 position = planet.getPosition();
-			graphics.fillOval(toScreenX(position.x)-radiusScreenPixels/2, toScreenY(position.y)-radiusScreenPixels/2, radiusScreenPixels, radiusScreenPixels);
+			drawPlanet(graphics, planet);
+		}
+		for (Planet planet : simulation.getWeightlessPlanets()) {
+			drawPlanet(graphics, planet);
+		}
+	}
 
-			Color tailColor = color;
-			for (Vector2 tailPosition : planet.getOldPositions()) {
-				graphics.setStroke(tailColor);
-				graphics.strokeLine(toScreenX(position.x), toScreenY(position.y), toScreenX(tailPosition.x), toScreenY(tailPosition.y));
-				tailColor = tailColor.deriveColor(0, 1.0, TAIL_FACTOR, 1.0);
-				
-				position = tailPosition;
-			}
+	private void drawPlanet(GraphicsContext graphics, Planet planet) {
+		Color color = Color.hsb(planet.getHue(), 1.0, 1.0);
+		graphics.setFill(color);
+		double radiusScreenPixels = toScreenPixels(planet.getRadius());
+		Vector2 position = planet.getPosition();
+		graphics.fillOval(toScreenX(position.x)-radiusScreenPixels/2, toScreenY(position.y)-radiusScreenPixels/2, radiusScreenPixels, radiusScreenPixels);
+
+		Color tailColor = color;
+		for (Vector2 tailPosition : planet.getOldPositions()) {
+			graphics.setStroke(tailColor);
+			graphics.strokeLine(toScreenX(position.x), toScreenY(position.y), toScreenX(tailPosition.x), toScreenY(tailPosition.y));
+			tailColor = tailColor.deriveColor(0, 1.0, TAIL_FACTOR, 1.0);
+			
+			position = tailPosition;
 		}
 	}
 
