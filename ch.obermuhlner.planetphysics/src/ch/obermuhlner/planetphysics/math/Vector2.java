@@ -4,6 +4,8 @@ import java.util.Objects;
 
 public class Vector2 {
 
+	public static final Vector2 ZERO = Vector2.of(0, 0);
+	
 	public final double x;
 	public final double y;
 
