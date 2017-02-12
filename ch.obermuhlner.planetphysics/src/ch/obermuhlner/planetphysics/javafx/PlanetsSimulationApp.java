@@ -92,10 +92,9 @@ public class PlanetsSimulationApp extends Application {
 		
 		int n = 1000;
 		for (int i = 0; i < n; i++) {
-			double orbitRadius = 100.0 + i * 400.0 / n;
-			double r = random(0.0, 1.0);
+			double orbitRadius = 100.0 + i * 1000.0 / n;
 			double mass = 0.0;
-			double hue = i * 360.0 / n;
+			double hue = i * 300.0 / n;
 			addPlanet(createOrbitingPlanet(central, orbitRadius, mass, hue));
 		}
 	}
@@ -112,12 +111,12 @@ public class PlanetsSimulationApp extends Application {
 	}
 	
 	public void clearPlanets() {
-		simulation.planets.clear();
+		simulation.clear();
 		totalMass = 0;
 	}
 	
 	public void addPlanet(Planet planet) {
-		simulation.planets.add(planet);
+		simulation.add(planet);
 		totalMass += planet.getMass();
 	}
 	
@@ -370,7 +369,7 @@ public class PlanetsSimulationApp extends Application {
 		graphics.setFill(Color.BLACK);
 		graphics.fillRect(0, 0, graphics.getCanvas().getWidth(), graphics.getCanvas().getHeight());
 		
-		for (Planet planet : simulation.planets) {
+		for (Planet planet : simulation.getPlanets()) {
 			Color color = Color.hsb(planet.getHue(), 1.0, 1.0);
 			graphics.setFill(color);
 			double radiusScreenPixels = toScreenPixels(planet.getRadius());

@@ -1,6 +1,8 @@
 package ch.obermuhlner.planetphysics;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -10,7 +12,19 @@ public class Simulation {
 
 	public static final double GRAVITY = 10.0;
 
-	public final List<Planet> planets = new ArrayList<>();
+	private final List<Planet> planets = new ArrayList<>();
+	
+	public void clear() {
+		planets.clear();
+	}
+	
+	public void add(Planet planet) {
+		planets.add(planet);
+	}
+	
+	public Collection<Planet> getPlanets() {
+		return Collections.unmodifiableCollection(planets);
+	}
 	
 	public void simulateStep(double deltaTime) {
 		for (Planet planet : planets) {
