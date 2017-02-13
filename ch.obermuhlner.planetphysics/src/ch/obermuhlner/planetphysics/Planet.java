@@ -40,10 +40,14 @@ public class Planet {
 	public Vector2 getPosition() {
 		return position;
 	}
-	
+
 	public void setPosition(Vector2 newPosition) {
+		setPosition(newPosition, TAIL_LENGTH);
+	}
+	
+	public void setPosition(Vector2 newPosition, int tailLength) {
 		oldPositions.addFirst(position);
-		if (oldPositions.size() > TAIL_LENGTH) {
+		while (oldPositions.size() > tailLength) {
 			oldPositions.removeLast();
 		}
 		position = newPosition;

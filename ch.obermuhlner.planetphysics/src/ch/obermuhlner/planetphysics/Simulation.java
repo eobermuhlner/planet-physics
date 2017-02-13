@@ -15,6 +15,12 @@ public class Simulation {
 	private final List<Planet> planets = new ArrayList<>();
 
 	private final List<Planet> weightlessPlanets = new ArrayList<>();
+
+	private int tailLength;
+	
+	public void setTailLength(int tailLength) {
+		this.tailLength = tailLength;
+	}
 	
 	public void clear() {
 		planets.clear();
@@ -54,28 +60,27 @@ public class Simulation {
 			return;
 		}
 		
-		Vector2 totalForce = Vector2.of(0, 0); 
-		for (Planet other : planets) {
-			if (other.isDeleted()) {
-				continue;
-			}
-			
-			if (other != planet) {
-				Vector2 delta = planet.getPosition().subtract(other.getPosition());
-				double distance = delta.getLength();
-				if (distance < planet.getRadius() + other.getRadius()) {
-					if (planet.getMass() == 0.0) {
-						other.merge(planet);
-					} else {
-						planet.merge(other);
+		Vector2 totalForce = planets.stream()
+				.map(other -> {
+					if (other != planet && !other.isDeleted()) {
+						Vector2 delta = planet.getPosition().subtract(other.getPosition());
+						double distance = delta.getLength();
+						if (distance < planet.getRadius() + other.getRadius()) {
+							if (planet.getMass() == 0.0) {
+								other.merge(planet);
+							} else {
+								planet.merge(other);
+							}
+						} else {
+							double magnitude = -GRAVITY * other.getMass() / (distance * distance);
+							Vector2 force = delta.normalize().multiply(magnitude);
+							return force;
+						}
 					}
-				} else {
-					double magnitude = -GRAVITY * other.getMass() / (distance * distance);
-					Vector2 force = delta.normalize().multiply(magnitude);
-					totalForce = totalForce.add(force);
-				}
-			}
-		}
+					return Vector2.ZERO;
+				})
+				.reduce(Vector2.ZERO, (accu, value) -> accu.add(value));
+		
 		planet.setSpeed(planet.getSpeed().add(totalForce.multiply(deltaTime)));
 	}
 
@@ -87,7 +92,7 @@ public class Simulation {
 			if (planet.isDeleted()) {
 				iterator.remove();
 			} else {
-				planet.setPosition(planet.getPosition().add(planet.getSpeed().multiply(deltaTime)));
+				planet.setPosition(planet.getPosition().add(planet.getSpeed().multiply(deltaTime)), tailLength);
 			}
 		}
 	}

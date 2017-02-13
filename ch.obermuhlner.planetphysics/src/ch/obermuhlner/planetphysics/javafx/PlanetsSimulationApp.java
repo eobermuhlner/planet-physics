@@ -13,9 +13,11 @@ import javafx.application.Application;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -43,14 +45,13 @@ public class PlanetsSimulationApp extends Application {
 
 	private static final DecimalFormat DOUBLE_FORMAT = new DecimalFormat("##0.000");
 
-	private static final double TAIL_FACTOR = Math.pow(0.05, 1.0 / Planet.TAIL_LENGTH);
-	
 	private Random random = new Random();
 
 	private final Simulation simulation = new Simulation();
 
 	private DoubleProperty deltaTimeProperty = new SimpleDoubleProperty(1.0);
 	private DoubleProperty zoomProperty = new SimpleDoubleProperty(1.0);
+	private IntegerProperty tailProperty = new SimpleIntegerProperty(3);
 
 	private DoubleProperty planetPositionXProperty = new SimpleDoubleProperty();
 	private DoubleProperty planetPositionYProperty = new SimpleDoubleProperty();
@@ -86,11 +87,12 @@ public class PlanetsSimulationApp extends Application {
 		addPlanet(central);
 
 //		addPlanet(createOrbitingPlanet(central, 100, 10, Color.GREEN.getHue()));
-//		addPlanet(createOrbitingPlanet(central, 200, 1, Color.MAGENTA.getHue()));
-		addPlanet(createOrbitingPlanet(central, 500, 100, Color.BLANCHEDALMOND.getHue()));
 //		addPlanet(createOrbitingPlanet(central, 320, 1, Color.BLUE.getHue()));
+
+		addPlanet(createOrbitingPlanet(central, 300, 20, Color.BLANCHEDALMOND.getHue()));
+//		addPlanet(createOrbitingPlanet(central, 600, 10, Color.MAGENTA.getHue()));
 		
-		int n = 1000;
+		int n = 10000;
 		for (int i = 0; i < n; i++) {
 			double orbitRadius = 100.0 + i * 1000.0 / n;
 			double mass = 0.0;
@@ -221,7 +223,23 @@ public class PlanetsSimulationApp extends Application {
         zoomSlider.valueProperty().addListener(event -> {
     		drawSimulator();
         });
-        
+
+        toolbarFlowPane.getChildren().add(new Label("Time:"));
+        Slider deltaTimeSlider = new Slider(0.0, 5.0, 1.0);
+        deltaTimeSlider.setShowTickMarks(true);
+        deltaTimeSlider.setShowTickLabels(true);
+        deltaTimeSlider.setMajorTickUnit(1.0f);
+        toolbarFlowPane.getChildren().add(deltaTimeSlider);
+        Bindings.bindBidirectional(deltaTimeProperty, deltaTimeSlider.valueProperty());
+
+        toolbarFlowPane.getChildren().add(new Label("Tail:"));
+        Slider tailSlider = new Slider(0.0, 100.0, 3.0);
+        tailSlider.setShowTickMarks(true);
+        tailSlider.setShowTickLabels(true);
+        tailSlider.setMajorTickUnit(10f);
+        toolbarFlowPane.getChildren().add(tailSlider);
+        Bindings.bindBidirectional(tailProperty, tailSlider.valueProperty());
+
         return toolbarFlowPane;
 	}
 
@@ -369,15 +387,17 @@ public class PlanetsSimulationApp extends Application {
 		graphics.setFill(Color.BLACK);
 		graphics.fillRect(0, 0, graphics.getCanvas().getWidth(), graphics.getCanvas().getHeight());
 		
+		double tailFactor = Math.pow(0.05, 1.0 / tailProperty.get());
+		
 		for (Planet planet : simulation.getPlanets()) {
-			drawPlanet(graphics, planet);
+			drawPlanet(graphics, planet, tailFactor);
 		}
 		for (Planet planet : simulation.getWeightlessPlanets()) {
-			drawPlanet(graphics, planet);
+			drawPlanet(graphics, planet, tailFactor);
 		}
 	}
 
-	private void drawPlanet(GraphicsContext graphics, Planet planet) {
+	private void drawPlanet(GraphicsContext graphics, Planet planet, double tailFactor) {
 		Color color = Color.hsb(planet.getHue(), 1.0, 1.0);
 		graphics.setFill(color);
 		double radiusScreenPixels = toScreenPixels(planet.getRadius());
@@ -388,7 +408,7 @@ public class PlanetsSimulationApp extends Application {
 		for (Vector2 tailPosition : planet.getOldPositions()) {
 			graphics.setStroke(tailColor);
 			graphics.strokeLine(toScreenX(position.x), toScreenY(position.y), toScreenX(tailPosition.x), toScreenY(tailPosition.y));
-			tailColor = tailColor.deriveColor(0, 1.0, TAIL_FACTOR, 1.0);
+			tailColor = tailColor.deriveColor(0, 1.0, tailFactor, 1.0);
 			
 			position = tailPosition;
 		}
@@ -409,6 +429,7 @@ public class PlanetsSimulationApp extends Application {
 	}
 
 	private void simulateStep() {
+		simulation.setTailLength(tailProperty.get());
 		simulation.simulateStep(deltaTimeProperty.get());
 	}
 
