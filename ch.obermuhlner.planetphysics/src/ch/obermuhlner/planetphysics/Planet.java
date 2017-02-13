@@ -8,7 +8,7 @@ import ch.obermuhlner.planetphysics.math.Vector2;
 
 public class Planet {
 
-	public static final int TAIL_LENGTH = 20;
+	public static final int DEFAULT_TAIL_LENGTH = 0;
 	
 	private Vector2 position;
 	private Vector2 speed;
@@ -18,7 +18,7 @@ public class Planet {
 	
 	private boolean deleted;
 	
-	public final Deque<Vector2> oldPositions = new ArrayDeque<>();
+	public Deque<Vector2> oldPositions = null;
 
 	public Planet(Vector2 position, Vector2 speed, double mass, double hue) {
 		this.position = position;
@@ -42,13 +42,20 @@ public class Planet {
 	}
 
 	public void setPosition(Vector2 newPosition) {
-		setPosition(newPosition, TAIL_LENGTH);
+		setPosition(newPosition, DEFAULT_TAIL_LENGTH);
 	}
 	
 	public void setPosition(Vector2 newPosition, int tailLength) {
-		oldPositions.addFirst(position);
-		while (oldPositions.size() > tailLength) {
-			oldPositions.removeLast();
+		if (tailLength == 0) {
+			oldPositions = null;
+		} else {
+			if (oldPositions == null) {
+				oldPositions = new ArrayDeque<>();
+			}
+			oldPositions.addFirst(position);
+			while (oldPositions.size() > tailLength) {
+				oldPositions.removeLast();
+			}
 		}
 		position = newPosition;
 	}
