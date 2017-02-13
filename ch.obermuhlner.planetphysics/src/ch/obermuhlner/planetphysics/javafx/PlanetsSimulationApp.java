@@ -45,6 +45,8 @@ import javafx.util.Duration;
 public class PlanetsSimulationApp extends Application {
 
 	private static final DecimalFormat DOUBLE_FORMAT = new DecimalFormat("##0.000");
+	private static final DecimalFormat SIMULATION_STEP_FORMAT = new DecimalFormat("##0");
+	private static final DecimalFormat SIMULATION_TIME_FORMAT = new DecimalFormat("##0.0");
 
 	private Random random = new Random();
 
@@ -54,6 +56,9 @@ public class PlanetsSimulationApp extends Application {
 	private DoubleProperty zoomProperty = new SimpleDoubleProperty(1.0);
 	private IntegerProperty tailProperty = new SimpleIntegerProperty(0);
 
+	private IntegerProperty simulationStepProperty = new SimpleIntegerProperty(0);
+	private DoubleProperty simulationTimeProperty = new SimpleDoubleProperty(0);
+	
 	private DoubleProperty planetPositionXProperty = new SimpleDoubleProperty();
 	private DoubleProperty planetPositionYProperty = new SimpleDoubleProperty();
 	private DoubleProperty planetSpeedXProperty = new SimpleDoubleProperty();
@@ -115,6 +120,8 @@ public class PlanetsSimulationApp extends Application {
 	public void clearPlanets() {
 		simulation.clear();
 		totalMass = 0;
+		simulationStepProperty.set(0);
+		simulationTimeProperty.set(0);
 	}
 	
 	public void addPlanet(Planet planet) {
@@ -224,7 +231,7 @@ public class PlanetsSimulationApp extends Application {
     		drawSimulator();
         });
 
-        toolbarFlowPane.getChildren().add(new Label("Time:"));
+        toolbarFlowPane.getChildren().add(new Label("Time Step:"));
         Slider deltaTimeSlider = new Slider(0.0, 5.0, 1.0);
         deltaTimeSlider.setShowTickMarks(true);
         deltaTimeSlider.setShowTickLabels(true);
@@ -239,6 +246,16 @@ public class PlanetsSimulationApp extends Application {
         tailSlider.setMajorTickUnit(10f);
         toolbarFlowPane.getChildren().add(tailSlider);
         Bindings.bindBidirectional(tailProperty, tailSlider.valueProperty());
+
+        toolbarFlowPane.getChildren().add(new Label("Step:"));
+        Label stepLabel = new Label("0");
+        toolbarFlowPane.getChildren().add(stepLabel);
+        Bindings.bindBidirectional(stepLabel.textProperty(), simulationStepProperty, SIMULATION_STEP_FORMAT);
+
+        toolbarFlowPane.getChildren().add(new Label("Time:"));
+        Label timeLabel = new Label("0");
+        toolbarFlowPane.getChildren().add(timeLabel);
+        Bindings.bindBidirectional(timeLabel.textProperty(), simulationTimeProperty, SIMULATION_TIME_FORMAT);
 
         return toolbarFlowPane;
 	}
@@ -434,6 +451,9 @@ public class PlanetsSimulationApp extends Application {
 	private void simulateStep() {
 		simulation.setTailLength(tailProperty.get());
 		simulation.simulateStep(deltaTimeProperty.get());
+		
+		simulationStepProperty.set(simulationStepProperty.get() + 1);
+		simulationTimeProperty.set(simulationTimeProperty.get() + deltaTimeProperty.get());
 	}
 
 	public static void main(String[] args) {
