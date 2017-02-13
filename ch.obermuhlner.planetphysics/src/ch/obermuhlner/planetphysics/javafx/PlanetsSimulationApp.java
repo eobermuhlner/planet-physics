@@ -89,8 +89,10 @@ public class PlanetsSimulationApp extends Application {
 //		addPlanet(createOrbitingPlanet(central, 100, 10, Color.GREEN.getHue()));
 //		addPlanet(createOrbitingPlanet(central, 320, 1, Color.BLUE.getHue()));
 
-		addPlanet(createOrbitingPlanet(central, 300, 20, Color.BLANCHEDALMOND.getHue()));
+//		addPlanet(createOrbitingPlanet(central, 300, 20, Color.BLANCHEDALMOND.getHue()));
 //		addPlanet(createOrbitingPlanet(central, 600, 10, Color.MAGENTA.getHue()));
+
+		addPlanet(new Planet(Vector2.of(2000, 800), Vector2.of(-2, 0), 10, Color.BLANCHEDALMOND.getHue()));
 		
 		int n = 10000;
 		for (int i = 0; i < n; i++) {
