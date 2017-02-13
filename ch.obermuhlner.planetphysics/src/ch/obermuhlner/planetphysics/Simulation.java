@@ -16,7 +16,13 @@ public class Simulation {
 
 	private final List<Planet> weightlessPlanets = new ArrayList<>();
 
+	private double weightLessThreshold = 0.0;
+	
 	private int tailLength;
+	
+	public void setWeightLessThreshold(double weightLessThreshold) {
+		this.weightLessThreshold = weightLessThreshold;
+	}
 	
 	public void setTailLength(int tailLength) {
 		this.tailLength = tailLength;
@@ -28,7 +34,7 @@ public class Simulation {
 	}
 	
 	public void add(Planet planet) {
-		if (planet.getMass() == 0.0) {
+		if (planet.getMass() <= weightLessThreshold) {
 			weightlessPlanets.add(planet);
 		} else {
 			planets.add(planet);
