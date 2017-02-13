@@ -94,16 +94,22 @@ public class PlanetsSimulationApp extends Application {
 		Planet central = new Planet(Vector2.of(0, 0), Vector2.of(0, 0), 1000.0, Color.YELLOW.getHue());
 		addPlanet(central);
 
-		addPlanet(createOrbitingPlanet(central, 300, 10, Color.BLANCHEDALMOND.getHue()));
+//		addPlanet(createOrbitingPlanet(central, 300, 10, Color.BLANCHEDALMOND.getHue()));
 //		addPlanet(createOrbitingPlanet(central, 600, 10, Color.MAGENTA.getHue()));
 
 //		addPlanet(new Planet(Vector2.of(2000, 800), Vector2.of(-2, 0), 400, Color.BLANCHEDALMOND.getHue()));
 		
-		int n = 1000;
-		for (int i = 0; i < n; i++) {
-			double orbitRadius = 100.0 + i * 1000.0 / n;
-			double mass = 0.0;
-			double hue = i * 300.0 / n;
+		addAsteroids(central, 1000, 0.0);
+		
+//		Planet central2 = createOrbitingPlanet(central, 2000, 1000, Color.BLANCHEDALMOND.getHue());
+//		addPlanet(central2);
+//		addAsteroids(central2, 1000, 0.0);
+	}
+
+	private void addAsteroids(Planet central, int count, double mass) {
+		for (int i = 0; i < count; i++) {
+			double orbitRadius = 100.0 + i * 1000.0 / count;
+			double hue = i * 300.0 / count;
 			addPlanet(createOrbitingPlanet(central, orbitRadius, mass, hue));
 		}
 	}
@@ -115,7 +121,7 @@ public class PlanetsSimulationApp extends Application {
 	private Planet createOrbitingPlanet(Planet central, double orbitRadius, double mass, double hue) {
 		double angle = random(0, 2*Math.PI);
 		Vector2 position = central.getPosition().add(Vector2.ofPolar(angle, orbitRadius));
-		Vector2 speed = central.getSpeed().add(Vector2.ofPolar(angle + Math.PI*0.5, Math.sqrt(Simulation.GRAVITY * (mass + totalMass) / orbitRadius)));
+		Vector2 speed = central.getSpeed().add(Vector2.ofPolar(angle + Math.PI*0.5, Math.sqrt(Simulation.GRAVITY * (mass + central.getMass()) / orbitRadius)));
 		return new Planet(position, speed, mass, hue);
 	}
 	
