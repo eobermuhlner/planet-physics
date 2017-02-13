@@ -6,6 +6,8 @@ Simple N-body physics simulation.
 
 ![Screenshot Viewer](ch.obermuhlner.planetphysics.docs/images/planetphysics-1.png?raw=true)
 
+![Screenshot Viewer](ch.obermuhlner.planetphysics.docs/images/planetphysics-2.png?raw=true)
+
 ## Implementation
 
 ![F=mass1*mass2/(distance*distance)](http://mathurl.com/je4k7da.png)
