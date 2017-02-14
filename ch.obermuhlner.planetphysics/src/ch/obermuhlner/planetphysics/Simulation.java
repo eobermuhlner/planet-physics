@@ -12,13 +12,19 @@ public class Simulation {
 
 	public static final double GRAVITY = 10.0;
 
+	private boolean collisions = true;
+	
+	private double weightLessThreshold = 0.0;
+	
 	private final List<Planet> planets = new ArrayList<>();
 
 	private final List<Planet> weightlessPlanets = new ArrayList<>();
 
-	private double weightLessThreshold = 0.0;
-	
 	private int tailLength;
+	
+	public void setCollisions(boolean collisions) {
+		this.collisions = collisions;
+	}
 	
 	public void setWeightLessThreshold(double weightLessThreshold) {
 		this.weightLessThreshold = weightLessThreshold;
@@ -71,7 +77,7 @@ public class Simulation {
 					if (other != planet && !other.isDeleted()) {
 						Vector2 delta = planet.getPosition().subtract(other.getPosition());
 						double distance = delta.getLength();
-						if (distance < planet.getRadius() + other.getRadius()) {
+						if (collisions && distance < planet.getRadius() + other.getRadius()) {
 							if (planet.getMass() == 0.0) {
 								other.merge(planet);
 							} else {

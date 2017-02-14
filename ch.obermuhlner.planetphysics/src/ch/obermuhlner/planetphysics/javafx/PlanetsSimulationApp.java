@@ -52,6 +52,7 @@ public class PlanetsSimulationApp extends Application {
 
 	private final Simulation simulation = new Simulation();
 
+	private BooleanProperty collisionsProperty = new SimpleBooleanProperty(true);
 	private DoubleProperty deltaTimeProperty = new SimpleDoubleProperty(1.0);
 	private DoubleProperty zoomProperty = new SimpleDoubleProperty(1.0);
 	private IntegerProperty tailProperty = new SimpleIntegerProperty(0);
@@ -94,12 +95,12 @@ public class PlanetsSimulationApp extends Application {
 		Planet central = new Planet(Vector2.of(0, 0), Vector2.of(0, 0), 1000.0, Color.YELLOW.getHue());
 		addPlanet(central);
 
-//		addPlanet(createOrbitingPlanet(central, 300, 10, Color.BLANCHEDALMOND.getHue()));
+//		addPlanet(createOrbitingPlanet(central, 800, 20, Color.BLANCHEDALMOND.getHue()));
 //		addPlanet(createOrbitingPlanet(central, 600, 10, Color.MAGENTA.getHue()));
 
-//		addPlanet(new Planet(Vector2.of(2000, 800), Vector2.of(-2, 0), 400, Color.BLANCHEDALMOND.getHue()));
+//		addPlanet(new Planet(Vector2.of(2000, 800), Vector2.of(-2, 0), 50, Color.BLANCHEDALMOND.getHue()));
 		
-		addAsteroids(central, 1000, 0.0);
+		addAsteroids(central, 1000, 0.01);
 		
 //		Planet central2 = createOrbitingPlanet(central, 2000, 1000, Color.BLANCHEDALMOND.getHue());
 //		addPlanet(central2);
@@ -241,6 +242,10 @@ public class PlanetsSimulationApp extends Application {
     		drawSimulator();
         });
 
+        CheckBox collisionsCheckBox = new CheckBox("Collisions");
+        toolbarFlowPane.getChildren().add(collisionsCheckBox);
+        Bindings.bindBidirectional(collisionsCheckBox.selectedProperty(), collisionsProperty);
+        
         toolbarFlowPane.getChildren().add(new Label("Time Step:"));
         Slider deltaTimeSlider = new Slider(0.0, 5.0, 1.0);
         deltaTimeSlider.setShowTickMarks(true);
