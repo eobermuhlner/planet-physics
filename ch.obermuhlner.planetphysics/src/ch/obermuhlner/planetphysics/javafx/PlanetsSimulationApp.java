@@ -1,10 +1,14 @@
 package ch.obermuhlner.planetphysics.javafx;
 
+import static ch.obermuhlner.planetphysics.javafx.ScenarioUtil.createAsteroids;
+import static ch.obermuhlner.planetphysics.javafx.ScenarioUtil.createOrbitingPlanet;
+import static ch.obermuhlner.planetphysics.javafx.ScenarioUtil.random;
+
 import java.text.DecimalFormat;
 import java.text.Format;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -48,17 +52,13 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-import static ch.obermuhlner.planetphysics.javafx.ScenarioUtil.random;
-import static ch.obermuhlner.planetphysics.javafx.ScenarioUtil.createAsteroids;
-import static ch.obermuhlner.planetphysics.javafx.ScenarioUtil.createOrbitingPlanet;
-
 public class PlanetsSimulationApp extends Application {
 
 	private static final DecimalFormat DOUBLE_FORMAT = new DecimalFormat("##0.000");
 	private static final DecimalFormat SIMULATION_INTEGER_FORMAT = new DecimalFormat("##0");
 	private static final DecimalFormat SIMULATION_TIME_FORMAT = new DecimalFormat("##0.0");
 	
-	private static final Map<String, Supplier<List<Planet>>> SCENARIOS = new HashMap<>();
+	private static final Map<String, Supplier<List<Planet>>> SCENARIOS = new LinkedHashMap<>();
 	
 	static {
 		SCENARIOS.put("Simple Solar System", () -> {
@@ -124,10 +124,58 @@ public class PlanetsSimulationApp extends Application {
 		SCENARIOS.put("Early Solar System", () -> {
 			List<Planet> planets = new ArrayList<>();
 			
+			Planet central = new Planet(Vector2.of(0, 0), Vector2.of(0, 0), 10.0, Color.YELLOW.getHue());
+			planets.add(central);
+			planets.addAll(createAsteroids(central, 1000, 0.1, 1, 500));
+
+			return planets;
+		});
+
+		SCENARIOS.put("Lagrange Points", () -> {
+			List<Planet> planets = new ArrayList<>();
+			
 			Planet central = new Planet(Vector2.of(0, 0), Vector2.of(0, 0), 100.0, Color.YELLOW.getHue());
 			planets.add(central);
-			planets.addAll(createAsteroids(central, 1000, 0.01));
 
+			double orbitRadius = 200;
+			planets.add(createOrbitingPlanet(central, orbitRadius, Math.toRadians(0), 2, Color.BLANCHEDALMOND.getHue()));
+			
+			planets.add(createOrbitingPlanet(central, orbitRadius, Math.toRadians(60), 0, Color.RED.getHue()));
+			planets.add(createOrbitingPlanet(central, orbitRadius, Math.toRadians(-60), 0, Color.GREEN.getHue()));
+			planets.add(createOrbitingPlanet(central, orbitRadius, Math.toRadians(180), 0, Color.LIGHTBLUE.getHue()));
+
+			for (int i = 0; i < 100; i++) {
+				planets.add(createOrbitingPlanet(central, orbitRadius, Math.random() * 2*Math.PI, 0, Color.BLUE.getHue()));
+			}
+
+			return planets;
+		});
+
+		SCENARIOS.put("Random 10", () -> {
+			List<Planet> planets = new ArrayList<>();
+			
+			for (int i = 0; i < 10; i++) {
+				planets.add(new Planet(
+						Vector2.of(random(-200, 200), random(-200, 200)),
+						Vector2.of(random(-1, 1), random(-1, 1)),
+						random(0.1, 10),
+						random(0, 360)));
+			}
+			
+			return planets;
+		});
+
+		SCENARIOS.put("Random 100", () -> {
+			List<Planet> planets = new ArrayList<>();
+			
+			for (int i = 0; i < 100; i++) {
+				planets.add(new Planet(
+						Vector2.of(random(-200, 200), random(-200, 200)),
+						Vector2.of(random(-1, 1), random(-1, 1)),
+						random(0.1, 10),
+						random(0, 360)));
+			}
+			
 			return planets;
 		});
 	}
