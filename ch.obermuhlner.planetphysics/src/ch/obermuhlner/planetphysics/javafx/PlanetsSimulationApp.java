@@ -116,6 +116,16 @@ public class PlanetsSimulationApp extends Application {
 
 			return planets;
 		});
+
+		SCENARIOS.put("Early Solar System", () -> {
+			List<Planet> planets = new ArrayList<>();
+			
+			Planet central = new Planet(Vector2.of(0, 0), Vector2.of(0, 0), 100.0, Color.YELLOW.getHue());
+			planets.add(central);
+			planets.addAll(createAsteroids(central, 1000, 0.01));
+
+			return planets;
+		});
 	}
 	
 
@@ -356,6 +366,8 @@ public class PlanetsSimulationApp extends Application {
 	private void showScenarioChoice() {
 		Collection<String> scenarioNames = SCENARIOS.keySet();
 		ChoiceDialog<String> scenarioChoiceDialog = new ChoiceDialog<String>(scenarioNames.iterator().next(), scenarioNames);
+		scenarioChoiceDialog.setHeaderText("Select Scenario");
+		scenarioChoiceDialog.setContentText("Select a scenario to simulate.");
 		scenarioChoiceDialog.showAndWait().ifPresent(result -> {
 			clearPlanets();
 			SCENARIOS.get(result).get().forEach(planet -> addPlanet(planet));
