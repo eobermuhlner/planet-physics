@@ -8,6 +8,7 @@ import java.util.Random;
 import ch.obermuhlner.planetphysics.Planet;
 import ch.obermuhlner.planetphysics.Simulation;
 import ch.obermuhlner.planetphysics.math.Vector2;
+import javafx.animation.Animation.Status;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
@@ -91,20 +92,55 @@ public class PlanetsSimulationApp extends Application {
 	Timeline simulationTimeline = new Timeline();
 	
 	public PlanetsSimulationApp() {
-
+		addSimpleSolarSystem();
+//		addJupiterAsteroids();
+//		addIncomingStranger();
+//		addTwoSolarSystems();
+	}
+	
+	private void addSimpleSolarSystem() {
 		Planet central = new Planet(Vector2.of(0, 0), Vector2.of(0, 0), 1000.0, Color.YELLOW.getHue());
 		addPlanet(central);
 
-//		addPlanet(createOrbitingPlanet(central, 800, 20, Color.BLANCHEDALMOND.getHue()));
-//		addPlanet(createOrbitingPlanet(central, 600, 10, Color.MAGENTA.getHue()));
+		addPlanet(createOrbitingPlanet(central, 300, 5, Color.MAGENTA.getHue()));
+		
+		Planet earth = createOrbitingPlanet(central, 600, 10, Color.BLANCHEDALMOND.getHue());
+		addPlanet(earth);
+		addPlanet(createOrbitingPlanet(earth, 15, 1, Color.CORAL.getHue()));
 
-//		addPlanet(new Planet(Vector2.of(2000, 800), Vector2.of(-2, 0), 50, Color.BLANCHEDALMOND.getHue()));
+		Planet jupiter = createOrbitingPlanet(central, 1000, 20, Color.GREEN.getHue());
+		addPlanet(jupiter);
+		addPlanet(createOrbitingPlanet(jupiter, 10, 0.1, Color.LIGHTBLUE.getHue()));
+		addPlanet(createOrbitingPlanet(jupiter, 25, 0.1, Color.RED.getHue()));
+	}
+	
+	private void addJupiterAsteroids() {
+		Planet central = new Planet(Vector2.of(0, 0), Vector2.of(0, 0), 1000.0, Color.YELLOW.getHue());
+		addPlanet(central);
+
+		addPlanet(createOrbitingPlanet(central, 800, 20, Color.BLANCHEDALMOND.getHue()));
 		
-		addAsteroids(central, 1000, 0.01);
-		
-//		Planet central2 = createOrbitingPlanet(central, 2000, 1000, Color.BLANCHEDALMOND.getHue());
-//		addPlanet(central2);
-//		addAsteroids(central2, 1000, 0.0);
+		addAsteroids(central, 10000, 0.0);
+	}		
+
+	private void addIncomingStranger() {
+		Planet central = new Planet(Vector2.of(0, 0), Vector2.of(0, 0), 1000.0, Color.YELLOW.getHue());
+		addPlanet(central);
+
+		addAsteroids(central, 10000, 0.0);
+
+		addPlanet(new Planet(Vector2.of(2000, 800), Vector2.of(-2, 0), 50, Color.BLANCHEDALMOND.getHue()));
+	}		
+
+	private void addTwoSolarSystems() {
+		Planet central = new Planet(Vector2.of(0, 0), Vector2.of(0, 0), 1000.0, Color.YELLOW.getHue());
+		addPlanet(central);
+
+		addAsteroids(central, 5000, 0.0);
+
+		Planet central2 = createOrbitingPlanet(central, 3000, 1000, Color.BLANCHEDALMOND.getHue());
+		addPlanet(central2);
+		addAsteroids(central2, 5000, 0.0);
 	}
 
 	private void addAsteroids(Planet central, int count, double mass) {
@@ -172,7 +208,7 @@ public class PlanetsSimulationApp extends Application {
 				drawSimulator();
 			}
 		}));
-		simulationTimeline.play();
+		//simulationTimeline.play();
 	}
 	
 	private double lastMouseDragX;
@@ -211,7 +247,7 @@ public class PlanetsSimulationApp extends Application {
         Button stopButton = new Button("Stop");
         Button stepButton = new Button("Step");
 
-        updateRunButtons(runButton, stopButton, stepButton, true);
+        updateRunButtons(runButton, stopButton, stepButton, simulationTimeline.getStatus() == Status.RUNNING);
 
         toolbarFlowPane.getChildren().add(runButton);
         runButton.addEventHandler(ActionEvent.ACTION, event -> {
