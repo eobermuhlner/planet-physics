@@ -2,8 +2,12 @@ package ch.obermuhlner.planetphysics.javafx;
 
 import java.text.DecimalFormat;
 import java.text.Format;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Random;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Supplier;
 
 import ch.obermuhlner.planetphysics.Planet;
 import ch.obermuhlner.planetphysics.Simulation;
@@ -50,12 +54,70 @@ public class PlanetsSimulationApp extends Application {
 	private static final DecimalFormat SIMULATION_INTEGER_FORMAT = new DecimalFormat("##0");
 	private static final DecimalFormat SIMULATION_TIME_FORMAT = new DecimalFormat("##0.0");
 	
-	private static final String SCENARIO_SIMPLE_SOLAR_SYSTEM = "Simple Solar System";
-	private static final String SCENARIO_JUPITER_ASTEROIDS = "Jupiter Asteroids";
-	private static final String SCENARIO_INCOMING_STRANGER = "Incoming Stranger";
-	private static final String SCENARIO_TWO_ASTEROID_SYSTEMS = "Two Asteroid Systems";
+	private static final Map<String, Supplier<List<Planet>>> SCENARIOS = new HashMap<>();
+	
+	static {
+		SCENARIOS.put("Simple Solar System", () -> {
+			List<Planet> planets = new ArrayList<>();
 
-	private Random random = new Random();
+			Planet central = new Planet(Vector2.of(0, 0), Vector2.of(0, 0), 1000.0, Color.YELLOW.getHue());
+			planets.add(central);
+
+			planets.add(createOrbitingPlanet(central, 300, 5, Color.MAGENTA.getHue()));
+			
+			Planet earth = createOrbitingPlanet(central, 600, 10, Color.BLANCHEDALMOND.getHue());
+			planets.add(earth);
+			planets.add(createOrbitingPlanet(earth, 15, 1, Color.CORAL.getHue()));
+
+			Planet jupiter = createOrbitingPlanet(central, 1000, 20, Color.GREEN.getHue());
+			planets.add(jupiter);
+			planets.add(createOrbitingPlanet(jupiter, 10, 0.1, Color.LIGHTBLUE.getHue()));
+			planets.add(createOrbitingPlanet(jupiter, 25, 0.1, Color.RED.getHue()));
+
+			return planets;
+		});
+
+		SCENARIOS.put("Jupiter Asteroids", () -> {
+			List<Planet> planets = new ArrayList<>();
+			
+			Planet central = new Planet(Vector2.of(0, 0), Vector2.of(0, 0), 1000.0, Color.YELLOW.getHue());
+			planets.add(central);
+
+			planets.add(createOrbitingPlanet(central, 800, 20, Color.BLANCHEDALMOND.getHue()));
+			
+			planets.addAll(createAsteroids(central, 10000, 0.0));
+
+			return planets;
+		});
+
+		SCENARIOS.put("Incoming Stranger", () -> {
+			List<Planet> planets = new ArrayList<>();
+			
+			Planet central = new Planet(Vector2.of(0, 0), Vector2.of(0, 0), 1000.0, Color.YELLOW.getHue());
+			planets.add(central);
+
+			planets.addAll(createAsteroids(central, 10000, 0.0));
+
+			planets.add(new Planet(Vector2.of(2000, 800), Vector2.of(-2, 0), 50, Color.BLANCHEDALMOND.getHue()));
+
+			return planets;
+		});
+
+		SCENARIOS.put("Two Asteroid Systems", () -> {
+			List<Planet> planets = new ArrayList<>();
+			
+			Planet central = new Planet(Vector2.of(0, 0), Vector2.of(0, 0), 1000.0, Color.YELLOW.getHue());
+			planets.add(central);
+			planets.addAll(createAsteroids(central, 5000, 0.0));
+
+			Planet central2 = createOrbitingPlanet(central, 2500, 1000, Color.BLANCHEDALMOND.getHue());
+			planets.add(central2);
+			planets.addAll(createAsteroids(central2, 5000, 0.0));
+
+			return planets;
+		});
+	}
+	
 
 	private final Simulation simulation = new Simulation();
 
@@ -100,64 +162,24 @@ public class PlanetsSimulationApp extends Application {
 	public PlanetsSimulationApp() {
 	}
 	
-	private void addSimpleSolarSystem() {
-		Planet central = new Planet(Vector2.of(0, 0), Vector2.of(0, 0), 1000.0, Color.YELLOW.getHue());
-		addPlanet(central);
-
-		addPlanet(createOrbitingPlanet(central, 300, 5, Color.MAGENTA.getHue()));
+	private static List<Planet> createAsteroids(Planet central, int count, double mass) {
+		List<Planet> asteroids = new ArrayList<>();
 		
-		Planet earth = createOrbitingPlanet(central, 600, 10, Color.BLANCHEDALMOND.getHue());
-		addPlanet(earth);
-		addPlanet(createOrbitingPlanet(earth, 15, 1, Color.CORAL.getHue()));
-
-		Planet jupiter = createOrbitingPlanet(central, 1000, 20, Color.GREEN.getHue());
-		addPlanet(jupiter);
-		addPlanet(createOrbitingPlanet(jupiter, 10, 0.1, Color.LIGHTBLUE.getHue()));
-		addPlanet(createOrbitingPlanet(jupiter, 25, 0.1, Color.RED.getHue()));
-	}
-	
-	private void addJupiterAsteroids() {
-		Planet central = new Planet(Vector2.of(0, 0), Vector2.of(0, 0), 1000.0, Color.YELLOW.getHue());
-		addPlanet(central);
-
-		addPlanet(createOrbitingPlanet(central, 800, 20, Color.BLANCHEDALMOND.getHue()));
-		
-		addAsteroids(central, 10000, 0.0);
-	}		
-
-	private void addIncomingStranger() {
-		Planet central = new Planet(Vector2.of(0, 0), Vector2.of(0, 0), 1000.0, Color.YELLOW.getHue());
-		addPlanet(central);
-
-		addAsteroids(central, 10000, 0.0);
-
-		addPlanet(new Planet(Vector2.of(2000, 800), Vector2.of(-2, 0), 50, Color.BLANCHEDALMOND.getHue()));
-	}		
-
-	private void addTwoAsteroidSystems() {
-		Planet central = new Planet(Vector2.of(0, 0), Vector2.of(0, 0), 1000.0, Color.YELLOW.getHue());
-		addPlanet(central);
-		addAsteroids(central, 5000, 0.0);
-
-		Planet central2 = createOrbitingPlanet(central, 2500, 1000, Color.BLANCHEDALMOND.getHue());
-		addPlanet(central2);
-		addAsteroids(central2, 5000, 0.0);
-	}
-
-	private void addAsteroids(Planet central, int count, double mass) {
 		for (int i = 0; i < count; i++) {
 			double orbitRadius = 100.0 + i * 1000.0 / count;
 			double hue = i * 300.0 / count;
-			addPlanet(createOrbitingPlanet(central, orbitRadius, mass, hue));
+			asteroids.add(createOrbitingPlanet(central, orbitRadius, mass, hue));
 		}
+		
+		return asteroids;
 	}
 	
-	private double random(double min, double max) {
-		return random.nextDouble() * (max - min) + min;
+	private static double random(double min, double max) {
+		return Math.random() * (max - min) + min;
 	}
 	
-	private Planet createOrbitingPlanet(Planet central, double orbitRadius, double mass, double hue) {
-		double angle = random(0, 2*Math.PI);
+	private static Planet createOrbitingPlanet(Planet central, double orbitRadius, double mass, double hue) {
+		double angle = Math.random() * 2*Math.PI;
 		Vector2 position = central.getPosition().add(Vector2.ofPolar(angle, orbitRadius));
 		double orbitSpeed = Math.sqrt(Simulation.GRAVITY * (mass + central.getMass()) / orbitRadius);
 		Vector2 speed = central.getSpeed().add(Vector2.ofPolar(angle + Math.PI*0.5, orbitSpeed));
@@ -212,7 +234,6 @@ public class PlanetsSimulationApp extends Application {
 				drawSimulator();
 			}
 		}));
-		//simulationTimeline.play();
 	}
 	
 	private double lastMouseDragX;
@@ -333,27 +354,11 @@ public class PlanetsSimulationApp extends Application {
 	}
 
 	private void showScenarioChoice() {
-		ChoiceDialog<String> scenarioChoiceDialog = new ChoiceDialog<String>(
-				SCENARIO_SIMPLE_SOLAR_SYSTEM,
-				SCENARIO_JUPITER_ASTEROIDS,
-				SCENARIO_INCOMING_STRANGER,
-				SCENARIO_TWO_ASTEROID_SYSTEMS);
+		Collection<String> scenarioNames = SCENARIOS.keySet();
+		ChoiceDialog<String> scenarioChoiceDialog = new ChoiceDialog<String>(scenarioNames.iterator().next(), scenarioNames);
 		scenarioChoiceDialog.showAndWait().ifPresent(result -> {
 			clearPlanets();
-			switch(result) {
-			case SCENARIO_SIMPLE_SOLAR_SYSTEM:
-				addSimpleSolarSystem();
-				break;
-			case SCENARIO_JUPITER_ASTEROIDS:
-				addJupiterAsteroids();
-				break;
-			case SCENARIO_INCOMING_STRANGER:
-				addIncomingStranger();
-				break;
-			case SCENARIO_TWO_ASTEROID_SYSTEMS:
-				addTwoAsteroidSystems();
-				break;
-			}
+			SCENARIOS.get(result).get().forEach(planet -> addPlanet(planet));
 			drawSimulator();
 		});
 	}
