@@ -31,6 +31,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
@@ -48,6 +49,11 @@ public class PlanetsSimulationApp extends Application {
 	private static final DecimalFormat DOUBLE_FORMAT = new DecimalFormat("##0.000");
 	private static final DecimalFormat SIMULATION_INTEGER_FORMAT = new DecimalFormat("##0");
 	private static final DecimalFormat SIMULATION_TIME_FORMAT = new DecimalFormat("##0.0");
+	
+	private static final String SCENARIO_SIMPLE_SOLAR_SYSTEM = "Simple Solar System";
+	private static final String SCENARIO_JUPITER_ASTEROIDS = "Jupiter Asteroids";
+	private static final String SCENARIO_INCOMING_STRANGER = "Incoming Stranger";
+	private static final String SCENARIO_TWO_ASTEROID_SYSTEMS = "Two Asteroid Systems";
 
 	private Random random = new Random();
 
@@ -92,10 +98,6 @@ public class PlanetsSimulationApp extends Application {
 	Timeline simulationTimeline = new Timeline();
 	
 	public PlanetsSimulationApp() {
-		addSimpleSolarSystem();
-//		addJupiterAsteroids();
-//		addIncomingStranger();
-//		addTwoSolarSystems();
 	}
 	
 	private void addSimpleSolarSystem() {
@@ -132,13 +134,12 @@ public class PlanetsSimulationApp extends Application {
 		addPlanet(new Planet(Vector2.of(2000, 800), Vector2.of(-2, 0), 50, Color.BLANCHEDALMOND.getHue()));
 	}		
 
-	private void addTwoSolarSystems() {
+	private void addTwoAsteroidSystems() {
 		Planet central = new Planet(Vector2.of(0, 0), Vector2.of(0, 0), 1000.0, Color.YELLOW.getHue());
 		addPlanet(central);
-
 		addAsteroids(central, 5000, 0.0);
 
-		Planet central2 = createOrbitingPlanet(central, 3000, 1000, Color.BLANCHEDALMOND.getHue());
+		Planet central2 = createOrbitingPlanet(central, 2500, 1000, Color.BLANCHEDALMOND.getHue());
 		addPlanet(central2);
 		addAsteroids(central2, 5000, 0.0);
 	}
@@ -158,7 +159,8 @@ public class PlanetsSimulationApp extends Application {
 	private Planet createOrbitingPlanet(Planet central, double orbitRadius, double mass, double hue) {
 		double angle = random(0, 2*Math.PI);
 		Vector2 position = central.getPosition().add(Vector2.ofPolar(angle, orbitRadius));
-		Vector2 speed = central.getSpeed().add(Vector2.ofPolar(angle + Math.PI*0.5, Math.sqrt(Simulation.GRAVITY * (mass + central.getMass()) / orbitRadius)));
+		double orbitSpeed = Math.sqrt(Simulation.GRAVITY * (mass + central.getMass()) / orbitRadius);
+		Vector2 speed = central.getSpeed().add(Vector2.ofPolar(angle + Math.PI*0.5, orbitSpeed));
 		return new Planet(position, speed, mass, hue);
 	}
 	
@@ -195,6 +197,8 @@ public class PlanetsSimulationApp extends Application {
         
 		primaryStage.setScene(scene);
         primaryStage.show();
+        
+		showScenarioChoice();
 	}
 
 	private void setupSimulationRendering() {
@@ -243,6 +247,12 @@ public class PlanetsSimulationApp extends Application {
         toolbarFlowPane.setHgap(4);
         toolbarFlowPane.setVgap(4);
 
+        Button newButton = new Button("New...");
+        toolbarFlowPane.getChildren().add(newButton);
+        newButton.addEventHandler(ActionEvent.ACTION, event -> {
+        	showScenarioChoice();
+        });
+        
         Button runButton = new Button("Run");
         Button stopButton = new Button("Stop");
         Button stepButton = new Button("Step");
@@ -320,6 +330,32 @@ public class PlanetsSimulationApp extends Application {
 
 
         return toolbarFlowPane;
+	}
+
+	private void showScenarioChoice() {
+		ChoiceDialog<String> scenarioChoiceDialog = new ChoiceDialog<String>(
+				SCENARIO_SIMPLE_SOLAR_SYSTEM,
+				SCENARIO_JUPITER_ASTEROIDS,
+				SCENARIO_INCOMING_STRANGER,
+				SCENARIO_TWO_ASTEROID_SYSTEMS);
+		scenarioChoiceDialog.showAndWait().ifPresent(result -> {
+			clearPlanets();
+			switch(result) {
+			case SCENARIO_SIMPLE_SOLAR_SYSTEM:
+				addSimpleSolarSystem();
+				break;
+			case SCENARIO_JUPITER_ASTEROIDS:
+				addJupiterAsteroids();
+				break;
+			case SCENARIO_INCOMING_STRANGER:
+				addIncomingStranger();
+				break;
+			case SCENARIO_TWO_ASTEROID_SYSTEMS:
+				addTwoAsteroidSystems();
+				break;
+			}
+			drawSimulator();
+		});
 	}
 
 	private void updateRunButtons(Button runButton, Button stopButton, Button stepButton, boolean running) {
