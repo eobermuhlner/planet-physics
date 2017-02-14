@@ -48,6 +48,10 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
+import static ch.obermuhlner.planetphysics.javafx.ScenarioUtil.random;
+import static ch.obermuhlner.planetphysics.javafx.ScenarioUtil.createAsteroids;
+import static ch.obermuhlner.planetphysics.javafx.ScenarioUtil.createOrbitingPlanet;
+
 public class PlanetsSimulationApp extends Application {
 
 	private static final DecimalFormat DOUBLE_FORMAT = new DecimalFormat("##0.000");
@@ -170,30 +174,6 @@ public class PlanetsSimulationApp extends Application {
 	Timeline simulationTimeline = new Timeline();
 	
 	public PlanetsSimulationApp() {
-	}
-	
-	private static List<Planet> createAsteroids(Planet central, int count, double mass) {
-		List<Planet> asteroids = new ArrayList<>();
-		
-		for (int i = 0; i < count; i++) {
-			double orbitRadius = 100.0 + i * 1000.0 / count;
-			double hue = i * 300.0 / count;
-			asteroids.add(createOrbitingPlanet(central, orbitRadius, mass, hue));
-		}
-		
-		return asteroids;
-	}
-	
-	private static double random(double min, double max) {
-		return Math.random() * (max - min) + min;
-	}
-	
-	private static Planet createOrbitingPlanet(Planet central, double orbitRadius, double mass, double hue) {
-		double angle = Math.random() * 2*Math.PI;
-		Vector2 position = central.getPosition().add(Vector2.ofPolar(angle, orbitRadius));
-		double orbitSpeed = Math.sqrt(Simulation.GRAVITY * (mass + central.getMass()) / orbitRadius);
-		Vector2 speed = central.getSpeed().add(Vector2.ofPolar(angle + Math.PI*0.5, orbitSpeed));
-		return new Planet(position, speed, mass, hue);
 	}
 	
 	public void clearPlanets() {
