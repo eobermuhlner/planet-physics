@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ch.obermuhlner.planetphysics.Planet;
-import ch.obermuhlner.planetphysics.Simulation;
+import ch.obermuhlner.planetphysics.BruteForceSimulation;
 import ch.obermuhlner.planetphysics.math.Vector2;
 
 public class ScenarioUtil {
@@ -36,7 +36,7 @@ public class ScenarioUtil {
 	
 	public static Planet createOrbitingPlanet(Planet central, double orbitRadius, double angle, double mass, double hue) {
 		Vector2 position = central.getPosition().add(Vector2.ofPolar(angle, orbitRadius));
-		double orbitSpeed = Math.sqrt(Simulation.GRAVITY * (mass + central.getMass()) / orbitRadius);
+		double orbitSpeed = Math.sqrt(BruteForceSimulation.GRAVITY * (mass + central.getMass()) / orbitRadius);
 		Vector2 speed = central.getSpeed().add(Vector2.ofPolar(angle + Math.PI*0.5, orbitSpeed));
 		return new Planet(position, speed, mass, hue);
 	}

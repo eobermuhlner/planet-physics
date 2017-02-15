@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 import ch.obermuhlner.planetphysics.Planet;
+import ch.obermuhlner.planetphysics.BruteForceSimulation;
 import ch.obermuhlner.planetphysics.Simulation;
 import ch.obermuhlner.planetphysics.math.Vector2;
 import javafx.animation.Animation.Status;
@@ -182,7 +183,7 @@ public class PlanetsSimulationApp extends Application {
 	}
 	
 
-	private final Simulation simulation = new Simulation();
+	private final Simulation simulation = new BruteForceSimulation();
 
 	private BooleanProperty collisionsProperty = new SimpleBooleanProperty(true);
 	private DoubleProperty deltaTimeProperty = new SimpleDoubleProperty(1.0);
@@ -453,7 +454,7 @@ public class PlanetsSimulationApp extends Application {
         	double mass = planetMassProperty.get();
     		Vector2 speed;
     		if (planetOrbitProperty.get()) {
-    			speed = Vector2.ofPolar(position.getAngle() + Math.PI*0.5, Math.sqrt(Simulation.GRAVITY * (mass + totalMass) / position.getLength()));
+    			speed = Vector2.ofPolar(position.getAngle() + Math.PI*0.5, Math.sqrt(BruteForceSimulation.GRAVITY * (mass + totalMass) / position.getLength()));
     		} else {
     			speed = Vector2.of(planetSpeedXProperty.get(), planetSpeedYProperty.get());
     		}
@@ -600,8 +601,7 @@ public class PlanetsSimulationApp extends Application {
 	}
 
 	private void simulateStep() {
-		simulation.setTailLength(tailProperty.get());
-		simulation.simulateStep(deltaTimeProperty.get());
+		simulation.simulateStep(deltaTimeProperty.get(), tailProperty.get());
 		
 		simulationStepProperty.set(simulationStepProperty.get() + 1);
 		simulationTimeProperty.set(simulationTimeProperty.get() + deltaTimeProperty.get());
