@@ -2,6 +2,7 @@ package ch.obermuhlner.planetphysics.javafx;
 
 import static ch.obermuhlner.planetphysics.javafx.ScenarioUtil.createAsteroids;
 import static ch.obermuhlner.planetphysics.javafx.ScenarioUtil.createOrbitingPlanet;
+import static ch.obermuhlner.planetphysics.javafx.ScenarioUtil.createRandomPlanets;
 import static ch.obermuhlner.planetphysics.javafx.ScenarioUtil.random;
 
 import java.text.DecimalFormat;
@@ -114,7 +115,7 @@ public class PlanetsSimulationApp extends Application {
 			planets.add(central);
 			planets.addAll(createAsteroids(central, 5000, 0.0));
 
-			Planet central2 = createOrbitingPlanet(central, 2500, 1000, Color.BLANCHEDALMOND.getHue());
+			Planet central2 = createOrbitingPlanet(central, 2500, 500, Color.BLANCHEDALMOND.getHue());
 			planets.add(central2);
 			planets.addAll(createAsteroids(central2, 5000, 0.0));
 
@@ -152,31 +153,15 @@ public class PlanetsSimulationApp extends Application {
 		});
 
 		SCENARIOS.put("Random 10", () -> {
-			List<Planet> planets = new ArrayList<>();
-			
-			for (int i = 0; i < 10; i++) {
-				planets.add(new Planet(
-						Vector2.of(random(-200, 200), random(-200, 200)),
-						Vector2.of(random(-1, 1), random(-1, 1)),
-						random(0.1, 10),
-						random(0, 360)));
-			}
-			
-			return planets;
+			return createRandomPlanets(10, 1.0);
 		});
 
 		SCENARIOS.put("Random 100", () -> {
-			List<Planet> planets = new ArrayList<>();
-			
-			for (int i = 0; i < 100; i++) {
-				planets.add(new Planet(
-						Vector2.of(random(-200, 200), random(-200, 200)),
-						Vector2.of(random(-1, 1), random(-1, 1)),
-						random(0.1, 10),
-						random(0, 360)));
-			}
-			
-			return planets;
+			return createRandomPlanets(100, 2.0);
+		});
+
+		SCENARIOS.put("Random 1000", () -> {
+			return createRandomPlanets(1000, 3.0);
 		});
 	}
 	
@@ -215,8 +200,8 @@ public class PlanetsSimulationApp extends Application {
 	
 	private double totalMass;
 
-	private double translateXProperty = 0;
-	private double translateYProperty = 0;
+	private double translateX = 0;
+	private double translateY = 0;
 	
 	private Canvas simulationCanvas;
 	Timeline simulationTimeline = new Timeline();
@@ -287,8 +272,8 @@ public class PlanetsSimulationApp extends Application {
 			lastMouseDragX = event.getX();
 			lastMouseDragY = event.getY();
 			
-			translateXProperty += deltaX;
-			translateYProperty += deltaY;
+			translateX += deltaX;
+			translateY += deltaY;
 		});
 		simulationCanvas.setOnMouseReleased(event -> {
 			double deltaX = event.getX() - lastMouseDragX;
@@ -296,8 +281,8 @@ public class PlanetsSimulationApp extends Application {
 			lastMouseDragX = event.getX();
 			lastMouseDragY = event.getY();
 			
-			translateXProperty += deltaX;
-			translateYProperty += deltaY;
+			translateX += deltaX;
+			translateY += deltaY;
 		});
 	}
 
@@ -397,6 +382,10 @@ public class PlanetsSimulationApp extends Application {
 		scenarioChoiceDialog.setHeaderText("Select Scenario");
 		scenarioChoiceDialog.setContentText("Select a scenario to simulate.");
 		scenarioChoiceDialog.showAndWait().ifPresent(result -> {
+			translateX = 0;
+			translateY = 0;
+			zoomProperty.set(0);
+			
 			clearPlanets();
 			SCENARIOS.get(result).get().forEach(planet -> addPlanet(planet));
 			drawSimulator();
@@ -558,11 +547,10 @@ public class PlanetsSimulationApp extends Application {
 	}
 
 	private void drawPlanet(GraphicsContext graphics, Planet planet, double tailFactor) {
-		Color color = Color.hsb(planet.getHue(), 1.0, 1.0);
-		graphics.setFill(color);
 		double radiusScreenPixels = toScreenPixels(planet.getRadius());
 		Vector2 position = planet.getPosition();
-		graphics.fillOval(toScreenX(position.x)-radiusScreenPixels/2, toScreenY(position.y)-radiusScreenPixels/2, radiusScreenPixels, radiusScreenPixels);
+		
+		Color color = Color.hsb(planet.getHue(), 1.0, 1.0);
 
 		Collection<Vector2> oldPositions = planet.getOldPositions();
 		if (oldPositions != null) {
@@ -575,16 +563,20 @@ public class PlanetsSimulationApp extends Application {
 				position = tailPosition;
 			}
 		}
+		
+		position = planet.getPosition();
+		graphics.setFill(color);
+		graphics.fillOval(toScreenX(position.x)-radiusScreenPixels/2, toScreenY(position.y)-radiusScreenPixels/2, radiusScreenPixels, radiusScreenPixels);
 	}
 
 	private double toScreenX(double x) {
 		double zoomFactor = Math.pow(10.0, zoomProperty.get());
-		return x / zoomFactor + simulationCanvas.getWidth() / 2 + translateXProperty;
+		return x / zoomFactor + simulationCanvas.getWidth() / 2 + translateX;
 	}
 
 	private double toScreenY(double y) {
 		double zoomFactor = Math.pow(10.0, zoomProperty.get());
-		return y / zoomFactor + simulationCanvas.getHeight() / 2  + translateYProperty;
+		return y / zoomFactor + simulationCanvas.getHeight() / 2  + translateY;
 	}
 
 	private double toScreenPixels(double x) {
