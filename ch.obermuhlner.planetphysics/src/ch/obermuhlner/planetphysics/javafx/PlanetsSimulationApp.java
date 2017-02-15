@@ -95,6 +95,19 @@ public class PlanetsSimulationApp extends Application {
 			return planets;
 		});
 
+		SCENARIOS.put("Saturn Ring", () -> {
+			List<Planet> planets = new ArrayList<>();
+			
+			Planet central = new Planet(Vector2.of(0, 0), Vector2.of(0, 0), 1000.0, Color.YELLOW.getHue());
+			planets.add(central);
+
+			planets.add(createOrbitingPlanet(central, 1500, 10, Color.BLANCHEDALMOND.getHue()));
+			
+			planets.addAll(createAsteroids(central, 10000, 0.0));
+
+			return planets;
+		});
+
 		SCENARIOS.put("Incoming Stranger", () -> {
 			List<Planet> planets = new ArrayList<>();
 			
