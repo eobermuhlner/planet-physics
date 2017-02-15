@@ -152,15 +152,18 @@ public class PlanetsSimulationApp extends Application {
 			planets.add(central);
 
 			double orbitRadius = 200;
-			planets.add(createOrbitingPlanet(central, orbitRadius, Math.toRadians(0), 2, Color.BLANCHEDALMOND.getHue()));
 			
+			int tooCloseToPlanet = 12;
+			for (int angle = 0 + tooCloseToPlanet; angle < 360 - tooCloseToPlanet; angle++) {
+				planets.add(createOrbitingPlanet(central, orbitRadius, Math.toRadians(angle), 0, Color.BLUE.getHue()));
+			}
+			
+			planets.add(createOrbitingPlanet(central, orbitRadius, Math.toRadians(0), 2, Color.BLANCHEDALMOND.getHue()));
+
 			planets.add(createOrbitingPlanet(central, orbitRadius, Math.toRadians(60), 0, Color.RED.getHue()));
 			planets.add(createOrbitingPlanet(central, orbitRadius, Math.toRadians(-60), 0, Color.GREEN.getHue()));
 			planets.add(createOrbitingPlanet(central, orbitRadius, Math.toRadians(180), 0, Color.LIGHTBLUE.getHue()));
 
-			for (int i = 0; i < 100; i++) {
-				planets.add(createOrbitingPlanet(central, orbitRadius, Math.random() * 2*Math.PI, 0, Color.BLUE.getHue()));
-			}
 
 			return planets;
 		});
