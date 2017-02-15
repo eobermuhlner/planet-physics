@@ -96,6 +96,10 @@ public class Planet {
 		return deleted;
 	}
 
+	public String getName() {
+		return null;
+	}
+	
 	@Override
 	public String toString() {
 		return "Planet [position=" + position + ", speed=" + speed + "]";

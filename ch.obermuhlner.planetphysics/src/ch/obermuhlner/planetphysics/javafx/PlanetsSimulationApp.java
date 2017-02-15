@@ -16,6 +16,7 @@ import java.util.function.Supplier;
 
 import ch.obermuhlner.planetphysics.Planet;
 import ch.obermuhlner.planetphysics.BruteForceSimulation;
+import ch.obermuhlner.planetphysics.NamedPlanet;
 import ch.obermuhlner.planetphysics.Simulation;
 import ch.obermuhlner.planetphysics.math.Vector2;
 import javafx.animation.Animation.Status;
@@ -149,7 +150,7 @@ public class PlanetsSimulationApp extends Application {
 		SCENARIOS.put("Lagrange Points", () -> {
 			List<Planet> planets = new ArrayList<>();
 			
-			Planet central = new Planet(Vector2.of(0, 0), Vector2.of(0, 0), 100.0, Color.YELLOW.getHue());
+			Planet central = new NamedPlanet("Sun", Vector2.of(0, 0), Vector2.of(0, 0), 100.0, Color.YELLOW.getHue());
 			planets.add(central);
 
 			double orbitRadius = 200;
@@ -159,12 +160,11 @@ public class PlanetsSimulationApp extends Application {
 				planets.add(createOrbitingPlanet(central, orbitRadius, Math.toRadians(angle), 0, Color.BLUE.getHue()));
 			}
 			
-			planets.add(createOrbitingPlanet(central, orbitRadius, Math.toRadians(0), 2, Color.BLANCHEDALMOND.getHue()));
+			planets.add(new NamedPlanet("Planet", createOrbitingPlanet(central, orbitRadius, Math.toRadians(0), 2, Color.BLANCHEDALMOND.getHue())));
 
-			planets.add(createOrbitingPlanet(central, orbitRadius, Math.toRadians(60), 0, Color.RED.getHue()));
-			planets.add(createOrbitingPlanet(central, orbitRadius, Math.toRadians(-60), 0, Color.GREEN.getHue()));
-			planets.add(createOrbitingPlanet(central, orbitRadius, Math.toRadians(180), 0, Color.LIGHTBLUE.getHue()));
-
+			planets.add(new NamedPlanet("L3", createOrbitingPlanet(central, orbitRadius, Math.toRadians(180), 0, Color.LIGHTBLUE.getHue())));
+			planets.add(new NamedPlanet("L4", createOrbitingPlanet(central, orbitRadius, Math.toRadians(60), 0, Color.RED.getHue())));
+			planets.add(new NamedPlanet("L5", createOrbitingPlanet(central, orbitRadius, Math.toRadians(-60), 0, Color.GREEN.getHue())));
 
 			return planets;
 		});
@@ -591,7 +591,12 @@ public class PlanetsSimulationApp extends Application {
 		
 		position = planet.getPosition();
 		graphics.setFill(color);
-		graphics.fillOval(toScreenX(position.x)-radiusScreenPixels/2, toScreenY(position.y)-radiusScreenPixels/2, radiusScreenPixels, radiusScreenPixels);
+		
+		double screenX = toScreenX(position.x)-radiusScreenPixels/2;
+		double screenY = toScreenY(position.y)-radiusScreenPixels/2;
+		graphics.fillOval(screenX, screenY, radiusScreenPixels, radiusScreenPixels);
+		
+		graphics.fillText(planet.getName(), screenX+2+radiusScreenPixels, screenY+2+radiusScreenPixels);
 	}
 
 	private double toScreenX(double x) {
