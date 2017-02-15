@@ -170,15 +170,15 @@ public class PlanetsSimulationApp extends Application {
 		});
 
 		SCENARIOS.put("Random 10", () -> {
-			return createRandomPlanets(10, 1.0);
+			return createRandomPlanets(10, 100, 1.0);
 		});
 
 		SCENARIOS.put("Random 100", () -> {
-			return createRandomPlanets(100, 2.0);
+			return createRandomPlanets(100, 200, 2.0);
 		});
 
 		SCENARIOS.put("Random 1000", () -> {
-			return createRandomPlanets(1000, 3.0);
+			return createRandomPlanets(1000, 400, 3.0);
 		});
 	}
 	
@@ -188,7 +188,8 @@ public class PlanetsSimulationApp extends Application {
 	private BooleanProperty collisionsProperty = new SimpleBooleanProperty(true);
 	private DoubleProperty deltaTimeProperty = new SimpleDoubleProperty(1.0);
 	private DoubleProperty zoomProperty = new SimpleDoubleProperty(1.0);
-	private IntegerProperty tailProperty = new SimpleIntegerProperty(0);
+	private BooleanProperty tailAutoProperty = new SimpleBooleanProperty();
+	private IntegerProperty tailLengthProperty = new SimpleIntegerProperty(0);
 
 	private IntegerProperty simulationStepProperty = new SimpleIntegerProperty(0);
 	private DoubleProperty simulationTimeProperty = new SimpleDoubleProperty(0);
@@ -361,13 +362,20 @@ public class PlanetsSimulationApp extends Application {
         toolbarFlowPane.getChildren().add(deltaTimeSlider);
         Bindings.bindBidirectional(deltaTimeProperty, deltaTimeSlider.valueProperty());
 
+
         toolbarFlowPane.getChildren().add(new Label("Tail:"));
-        Slider tailSlider = new Slider(0.0, 100.0, 0.0);
-        tailSlider.setShowTickMarks(true);
-        tailSlider.setShowTickLabels(true);
-        tailSlider.setMajorTickUnit(10f);
-        toolbarFlowPane.getChildren().add(tailSlider);
-        Bindings.bindBidirectional(tailProperty, tailSlider.valueProperty());
+        CheckBox tailAutoCheckBox = new CheckBox("Auto");
+        toolbarFlowPane.getChildren().add(tailAutoCheckBox);
+        Bindings.bindBidirectional(tailAutoProperty, tailAutoCheckBox.selectedProperty());
+        tailAutoCheckBox.setSelected(true);
+
+        Slider tailLengthSlider = new Slider(0.0, 100.0, 0.0);
+        tailLengthSlider.setShowTickMarks(true);
+        tailLengthSlider.setShowTickLabels(true);
+        tailLengthSlider.setMajorTickUnit(10f);
+        toolbarFlowPane.getChildren().add(tailLengthSlider);
+        Bindings.bindBidirectional(tailLengthProperty, tailLengthSlider.valueProperty());
+        tailLengthSlider.disableProperty().bind(tailAutoCheckBox.selectedProperty());
 
         toolbarFlowPane.getChildren().add(new Label("Step:"));
         Label stepLabel = new Label("0");
@@ -553,7 +561,7 @@ public class PlanetsSimulationApp extends Application {
 		graphics.setFill(Color.BLACK);
 		graphics.fillRect(0, 0, graphics.getCanvas().getWidth(), graphics.getCanvas().getHeight());
 		
-		double tailFactor = tailProperty.get() == 0 ? 0 : Math.pow(0.05, 1.0 / tailProperty.get());
+		double tailFactor = tailLengthProperty.get() == 0 ? 0 : Math.pow(0.05, 1.0 / tailLengthProperty.get());
 		
 		for (Planet planet : simulation.getPlanets()) {
 			drawPlanet(graphics, planet, tailFactor);
@@ -601,13 +609,19 @@ public class PlanetsSimulationApp extends Application {
 	}
 
 	private void simulateStep() {
-		simulation.simulateStep(deltaTimeProperty.get(), tailProperty.get());
+		simulation.simulateStep(deltaTimeProperty.get(), tailLengthProperty.get());
 		
 		simulationStepProperty.set(simulationStepProperty.get() + 1);
 		simulationTimeProperty.set(simulationTimeProperty.get() + deltaTimeProperty.get());
 		
-		simulationPlanetCountProperty.set(simulation.getPlanets().size());
-		simulationWeightlessPlanetCountProperty.set(simulation.getWeightlessPlanets().size());
+		int planetCount = simulation.getPlanets().size();
+		simulationPlanetCountProperty.set(planetCount);
+		int weightlessPlanetCount = simulation.getWeightlessPlanets().size();
+		simulationWeightlessPlanetCountProperty.set(weightlessPlanetCount);
+		int totalPlanetCount = planetCount + weightlessPlanetCount;
+		if (tailAutoProperty.get()) {
+			tailLengthProperty.set(Math.max(0, 100 - totalPlanetCount / 6));
+		}
 	}
 
 	public static void main(String[] args) {

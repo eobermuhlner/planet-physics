@@ -41,13 +41,13 @@ public class ScenarioUtil {
 		return new Planet(position, speed, mass, hue);
 	}
 	
-	public static List<Planet> createRandomPlanets(int count, double speed) {
+	public static List<Planet> createRandomPlanets(int count, double maxRadius, double maxSpeed) {
 		List<Planet> planets = new ArrayList<>();
 		
-		for (int i = 0; i < 100; i++) {
+		for (int i = 0; i < count; i++) {
 			planets.add(new Planet(
-					Vector2.of(random(-200, 200), random(-200, 200)),
-					Vector2.of(random(-speed, speed), random(-speed, speed)),
+					Vector2.of(random(-maxRadius, maxRadius), random(-maxRadius, maxRadius)),
+					Vector2.of(random(-maxSpeed, maxSpeed), random(-maxSpeed, maxSpeed)),
 					random(0.1, 2),
 					random(0, 360)));
 		}
