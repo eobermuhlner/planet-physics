@@ -150,7 +150,8 @@ public class PlanetsSimulationApp extends Application {
 		SCENARIOS.put("Lagrange Points", () -> {
 			List<Planet> planets = new ArrayList<>();
 			
-			Planet central = new NamedPlanet("Sun", Vector2.of(0, 0), Vector2.of(0, 0), 100.0, Color.YELLOW.getHue());
+			double centralMass = 100.0;
+			Planet central = new NamedPlanet("Sun", Vector2.of(0, 0), Vector2.of(0, 0), centralMass, Color.YELLOW.getHue());
 			planets.add(central);
 
 			double orbitRadius = 200;
@@ -160,8 +161,15 @@ public class PlanetsSimulationApp extends Application {
 				planets.add(createOrbitingPlanet(central, orbitRadius, Math.toRadians(angle), 0, Color.BLUE.getHue()));
 			}
 			
-			planets.add(new NamedPlanet("Planet", createOrbitingPlanet(central, orbitRadius, Math.toRadians(0), 2, Color.BLANCHEDALMOND.getHue())));
+			double planetMass = 1;
+			NamedPlanet planet = new NamedPlanet("Planet", createOrbitingPlanet(central, orbitRadius, Math.toRadians(0), planetMass, Color.BLANCHEDALMOND.getHue()));
+			planets.add(planet);
 
+//			double lagrangeOrbitRadius = orbitRadius * Math.pow(planetMass / (3.0*centralMass), 1.0/3.0);
+//			System.out.println(lagrangeOrbitRadius);
+//			planets.add(new NamedPlanet("L1", createOrbitingPlanet(central, orbitRadius - lagrangeOrbitRadius, Math.toRadians(0), 0, Color.MAGENTA.getHue())));
+//			planets.add(new NamedPlanet("L2", createOrbitingPlanet(central, orbitRadius + lagrangeOrbitRadius, Math.toRadians(0), 0, Color.CORAL.getHue())));
+			
 			planets.add(new NamedPlanet("L3", createOrbitingPlanet(central, orbitRadius, Math.toRadians(180), 0, Color.LIGHTBLUE.getHue())));
 			planets.add(new NamedPlanet("L4", createOrbitingPlanet(central, orbitRadius, Math.toRadians(60), 0, Color.RED.getHue())));
 			planets.add(new NamedPlanet("L5", createOrbitingPlanet(central, orbitRadius, Math.toRadians(-60), 0, Color.GREEN.getHue())));
@@ -563,10 +571,10 @@ public class PlanetsSimulationApp extends Application {
 		
 		double tailFactor = tailLengthProperty.get() == 0 ? 0 : Math.pow(0.05, 1.0 / tailLengthProperty.get());
 		
-		for (Planet planet : simulation.getPlanets()) {
+		for (Planet planet : simulation.getWeightlessPlanets()) {
 			drawPlanet(graphics, planet, tailFactor);
 		}
-		for (Planet planet : simulation.getWeightlessPlanets()) {
+		for (Planet planet : simulation.getPlanets()) {
 			drawPlanet(graphics, planet, tailFactor);
 		}
 	}
