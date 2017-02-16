@@ -67,19 +67,35 @@ public class PlanetsSimulationApp extends Application {
 		SCENARIOS.put("Simple Solar System", () -> {
 			List<Planet> planets = new ArrayList<>();
 
-			Planet central = new Planet(Vector2.of(0, 0), Vector2.of(0, 0), 1000.0, Color.YELLOW.getHue());
+			Planet central = new NamedPlanet("Sun", Vector2.of(0, 0), Vector2.of(0, 0), 1000.0, Color.YELLOW.getHue());
 			planets.add(central);
 
-			planets.add(createOrbitingPlanet(central, 300, 5, Color.MAGENTA.getHue()));
+			planets.add(new NamedPlanet("Mercury", createOrbitingPlanet(central, 100, 0.1, Color.MAGENTA.getHue())));
+			planets.add(new NamedPlanet("Venus", createOrbitingPlanet(central, 150, 0.2, Color.YELLOW.getHue())));
 			
-			Planet earth = createOrbitingPlanet(central, 600, 10, Color.BLANCHEDALMOND.getHue());
+			Planet earth = new NamedPlanet("Earth", createOrbitingPlanet(central, 250, 3, Color.TURQUOISE.getHue()));
 			planets.add(earth);
-			planets.add(createOrbitingPlanet(earth, 15, 1, Color.CORAL.getHue()));
+			planets.add(createOrbitingPlanet(earth, 5, 0.01, Color.BLANCHEDALMOND.getHue()));
 
-			Planet jupiter = createOrbitingPlanet(central, 1000, 20, Color.GREEN.getHue());
+			planets.add(new NamedPlanet("Mars", createOrbitingPlanet(central, 350, 0.2, Color.RED.getHue())));
+
+			planets.addAll(createAsteroids(central, 200, 0.0, 420, 520, Color.LIGHTGREEN.getHue()));
+
+			Planet jupiter = new NamedPlanet("Jupiter", createOrbitingPlanet(central, 700, 3, Color.BISQUE.getHue()));
 			planets.add(jupiter);
-			planets.add(createOrbitingPlanet(jupiter, 10, 0.1, Color.LIGHTBLUE.getHue()));
-			planets.add(createOrbitingPlanet(jupiter, 25, 0.1, Color.RED.getHue()));
+			planets.add(createOrbitingPlanet(jupiter, 10, 0.01, Color.LIGHTBLUE.getHue()));
+			planets.add(createOrbitingPlanet(jupiter, 15, 0.01, Color.VIOLET.getHue()));
+			planets.add(createOrbitingPlanet(jupiter, 22, 0.01, Color.GREEN.getHue()));
+			planets.add(createOrbitingPlanet(jupiter, 26, 0.01, Color.CADETBLUE.getHue()));
+
+			Planet saturn = new NamedPlanet("Saturn", createOrbitingPlanet(central, 1200, 3, Color.GREEN.getHue()));
+			planets.add(saturn);
+			planets.addAll(createAsteroids(saturn, 50, 0.0, 5, 10, Color.BLANCHEDALMOND.getHue()));
+
+			planets.add(new NamedPlanet("Uranus", createOrbitingPlanet(central, 1700, 0.2, Color.DEEPSKYBLUE.getHue())));
+			planets.add(new NamedPlanet("Neptune", createOrbitingPlanet(central, 2400, 0.2, Color.LIGHTSTEELBLUE.getHue())));
+
+			planets.addAll(createAsteroids(central, 100, 0.0, 2600, 3000, Color.DARKGREEN.getHue()));
 
 			return planets;
 		});
@@ -198,6 +214,7 @@ public class PlanetsSimulationApp extends Application {
 	private DoubleProperty zoomProperty = new SimpleDoubleProperty(1.0);
 	private BooleanProperty tailAutoProperty = new SimpleBooleanProperty();
 	private IntegerProperty tailLengthProperty = new SimpleIntegerProperty(0);
+	private BooleanProperty tailWeightlessProperty = new SimpleBooleanProperty();
 
 	private IntegerProperty simulationStepProperty = new SimpleIntegerProperty(0);
 	private DoubleProperty simulationTimeProperty = new SimpleDoubleProperty(0);
@@ -384,6 +401,10 @@ public class PlanetsSimulationApp extends Application {
         toolbarFlowPane.getChildren().add(tailLengthSlider);
         Bindings.bindBidirectional(tailLengthProperty, tailLengthSlider.valueProperty());
         tailLengthSlider.disableProperty().bind(tailAutoCheckBox.selectedProperty());
+        
+        CheckBox tailWeightlessCheckBox = new CheckBox("Weightless");
+        toolbarFlowPane.getChildren().add(tailWeightlessCheckBox);
+        Bindings.bindBidirectional(tailWeightlessProperty, tailWeightlessCheckBox.selectedProperty());
 
         toolbarFlowPane.getChildren().add(new Label("Step:"));
         Label stepLabel = new Label("0");
@@ -569,26 +590,28 @@ public class PlanetsSimulationApp extends Application {
 		graphics.setFill(Color.BLACK);
 		graphics.fillRect(0, 0, graphics.getCanvas().getWidth(), graphics.getCanvas().getHeight());
 		
-		double tailFactor = tailLengthProperty.get() == 0 ? 0 : Math.pow(0.05, 1.0 / tailLengthProperty.get());
+		int tailLength = tailLengthProperty.get();
+		double tailFactor = tailLength == 0 ? 0 : Math.pow(0.05, 1.0 / tailLengthProperty.get());
 		
 		for (Planet planet : simulation.getWeightlessPlanets()) {
-			drawPlanet(graphics, planet, tailFactor);
+			drawPlanet(graphics, planet, tailWeightlessProperty.get() ? tailLength : 0, tailFactor);
 		}
 		for (Planet planet : simulation.getPlanets()) {
-			drawPlanet(graphics, planet, tailFactor);
+			drawPlanet(graphics, planet, tailLength, tailFactor);
 		}
 	}
 
-	private void drawPlanet(GraphicsContext graphics, Planet planet, double tailFactor) {
+	private void drawPlanet(GraphicsContext graphics, Planet planet, int tailLength, double tailFactor) {
 		double radiusScreenPixels = toScreenPixels(planet.getRadius());
 		Vector2 position = planet.getPosition();
 		
 		Color color = Color.hsb(planet.getHue(), 1.0, 1.0);
 
-		Collection<Vector2> oldPositions = planet.getOldPositions();
+		List<Vector2> oldPositions = planet.getOldPositions();
 		if (oldPositions != null) {
 			Color tailColor = color;
-			for (Vector2 tailPosition : oldPositions) {
+			for (int i = 0; i < Math.min(tailLength, oldPositions.size()); i++) {
+				Vector2 tailPosition = oldPositions.get(i);
 				graphics.setStroke(tailColor);
 				graphics.strokeLine(toScreenX(position.x), toScreenY(position.y), toScreenX(tailPosition.x), toScreenY(tailPosition.y));
 				tailColor = tailColor.deriveColor(0, 1.0, tailFactor, 1.0);
@@ -629,11 +652,13 @@ public class PlanetsSimulationApp extends Application {
 		
 		int planetCount = simulation.getPlanets().size();
 		simulationPlanetCountProperty.set(planetCount);
-		int weightlessPlanetCount = simulation.getWeightlessPlanets().size();
-		simulationWeightlessPlanetCountProperty.set(weightlessPlanetCount);
-		int totalPlanetCount = planetCount + weightlessPlanetCount;
+		if (tailWeightlessProperty.get()) {
+			int weightlessPlanetCount = simulation.getWeightlessPlanets().size();
+			simulationWeightlessPlanetCountProperty.set(weightlessPlanetCount);
+			planetCount += weightlessPlanetCount;
+		}
 		if (tailAutoProperty.get()) {
-			tailLengthProperty.set(Math.max(0, 100 - totalPlanetCount / 6));
+			tailLengthProperty.set(Math.max(0, 100 - planetCount / 6));
 		}
 	}
 

@@ -1,8 +1,7 @@
 package ch.obermuhlner.planetphysics;
 
-import java.util.ArrayDeque;
-import java.util.Collection;
-import java.util.Deque;
+import java.util.ArrayList;
+import java.util.List;
 
 import ch.obermuhlner.planetphysics.math.Vector2;
 
@@ -18,7 +17,7 @@ public class Planet {
 	
 	private boolean deleted;
 	
-	public Deque<Vector2> oldPositions = null;
+	public List<Vector2> oldPositions = null;
 
 	public Planet(Vector2 position, Vector2 speed, double mass, double hue) {
 		this.position = position;
@@ -50,17 +49,17 @@ public class Planet {
 			oldPositions = null;
 		} else {
 			if (oldPositions == null) {
-				oldPositions = new ArrayDeque<>();
+				oldPositions = new ArrayList<>();
 			}
-			oldPositions.addFirst(position);
+			oldPositions.add(0, position);
 			while (oldPositions.size() > tailLength) {
-				oldPositions.removeLast();
+				oldPositions.remove(oldPositions.size() - 1);
 			}
 		}
 		position = newPosition;
 	}
 	
-	public Collection<Vector2> getOldPositions() {
+	public List<Vector2> getOldPositions() {
 		return oldPositions;
 	}
 	

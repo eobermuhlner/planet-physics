@@ -18,11 +18,15 @@ public class ScenarioUtil {
 	}
 	
 	public static List<Planet> createAsteroids(Planet central, int count, double mass, double minOrbitRadius, double maxOrbitRadius) {
+		return createAsteroids(central, count, mass, minOrbitRadius, maxOrbitRadius, null);
+	}
+	
+	public static List<Planet> createAsteroids(Planet central, int count, double mass, double minOrbitRadius, double maxOrbitRadius, Double defaultHue) {
 		List<Planet> asteroids = new ArrayList<>();
 		
 		for (int i = 0; i < count; i++) {
 			double orbitRadius = minOrbitRadius + (i + Math.random()) * (maxOrbitRadius - minOrbitRadius) / count;
-			double hue = i * 300.0 / count;
+			double hue = defaultHue != null ? defaultHue : i * 300.0 / count;
 			asteroids.add(createOrbitingPlanet(central, orbitRadius, mass, hue));
 		}
 		
