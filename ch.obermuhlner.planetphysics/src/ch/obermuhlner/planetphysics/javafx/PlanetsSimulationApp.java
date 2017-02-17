@@ -16,7 +16,6 @@ import java.util.function.Supplier;
 
 import ch.obermuhlner.planetphysics.Planet;
 import ch.obermuhlner.planetphysics.BruteForceSimulation;
-import ch.obermuhlner.planetphysics.NamedPlanet;
 import ch.obermuhlner.planetphysics.Simulation;
 import ch.obermuhlner.planetphysics.math.Vector2;
 import javafx.animation.Animation.Status;
@@ -68,33 +67,33 @@ public class PlanetsSimulationApp extends Application {
 		SCENARIOS.put("Simple Solar System", () -> {
 			List<Planet> planets = new ArrayList<>();
 
-			Planet central = new NamedPlanet("Sun", Vector2.of(0, 0), Vector2.of(0, 0), 1000.0, Color.YELLOW.getHue());
+			Planet central = new Planet("Sun", Vector2.of(0, 0), Vector2.of(0, 0), 1000.0, Color.YELLOW.getHue());
 			planets.add(central);
 
-			planets.add(new NamedPlanet("Mercury", createOrbitingPlanet(central, 100, 0.1, Color.MAGENTA.getHue())));
-			planets.add(new NamedPlanet("Venus", createOrbitingPlanet(central, 150, 0.2, Color.YELLOW.getHue())));
+			planets.add(new Planet("Mercury", createOrbitingPlanet(central, 100, 0.1, Color.MAGENTA.getHue())));
+			planets.add(new Planet("Venus", createOrbitingPlanet(central, 150, 0.2, Color.YELLOW.getHue())));
 			
-			Planet earth = new NamedPlanet("Earth", createOrbitingPlanet(central, 250, 3, Color.TURQUOISE.getHue()));
+			Planet earth = new Planet("Earth", createOrbitingPlanet(central, 250, 3, Color.TURQUOISE.getHue()));
 			planets.add(earth);
 			planets.add(createOrbitingPlanet(earth, 5, 0.01, Color.BLANCHEDALMOND.getHue()));
 
-			planets.add(new NamedPlanet("Mars", createOrbitingPlanet(central, 350, 0.2, Color.RED.getHue())));
+			planets.add(new Planet("Mars", createOrbitingPlanet(central, 350, 0.2, Color.RED.getHue())));
 
 			planets.addAll(createAsteroids(central, 200, 0.0, 420, 520, Color.LIGHTGREEN.getHue()));
 
-			Planet jupiter = new NamedPlanet("Jupiter", createOrbitingPlanet(central, 700, 3, Color.BISQUE.getHue()));
+			Planet jupiter = new Planet("Jupiter", createOrbitingPlanet(central, 700, 3, Color.BISQUE.getHue()));
 			planets.add(jupiter);
 			planets.add(createOrbitingPlanet(jupiter, 10, 0.01, Color.LIGHTBLUE.getHue()));
 			planets.add(createOrbitingPlanet(jupiter, 15, 0.01, Color.VIOLET.getHue()));
 			planets.add(createOrbitingPlanet(jupiter, 22, 0.01, Color.GREEN.getHue()));
 			planets.add(createOrbitingPlanet(jupiter, 26, 0.01, Color.CADETBLUE.getHue()));
 
-			Planet saturn = new NamedPlanet("Saturn", createOrbitingPlanet(central, 1200, 3, Color.GREEN.getHue()));
+			Planet saturn = new Planet("Saturn", createOrbitingPlanet(central, 1200, 3, Color.GREEN.getHue()));
 			planets.add(saturn);
 			planets.addAll(createAsteroids(saturn, 50, 0.0, 5, 10, Color.BLANCHEDALMOND.getHue()));
 
-			planets.add(new NamedPlanet("Uranus", createOrbitingPlanet(central, 1700, 0.2, Color.DEEPSKYBLUE.getHue())));
-			planets.add(new NamedPlanet("Neptune", createOrbitingPlanet(central, 2400, 0.2, Color.LIGHTSTEELBLUE.getHue())));
+			planets.add(new Planet("Uranus", createOrbitingPlanet(central, 1700, 0.2, Color.DEEPSKYBLUE.getHue())));
+			planets.add(new Planet("Neptune", createOrbitingPlanet(central, 2400, 0.2, Color.LIGHTSTEELBLUE.getHue())));
 
 			planets.addAll(createAsteroids(central, 100, 0.0, 2600, 3000, Color.DARKGREEN.getHue()));
 
@@ -170,7 +169,7 @@ public class PlanetsSimulationApp extends Application {
 			List<Planet> planets = new ArrayList<>();
 			
 			double centralMass = 100.0;
-			Planet central = new NamedPlanet("Sun", Vector2.of(0, 0), Vector2.of(0, 0), centralMass, Color.YELLOW.getHue());
+			Planet central = new Planet("Sun", Vector2.of(0, 0), Vector2.of(0, 0), centralMass, Color.YELLOW.getHue());
 			planets.add(central);
 
 			double orbitRadius = 200;
@@ -181,17 +180,17 @@ public class PlanetsSimulationApp extends Application {
 			}
 			
 			double planetMass = 1;
-			NamedPlanet planet = new NamedPlanet("Planet", createOrbitingPlanet(central, orbitRadius, Math.toRadians(0), planetMass, Color.BLANCHEDALMOND.getHue()));
+			Planet planet = new Planet("Planet", createOrbitingPlanet(central, orbitRadius, Math.toRadians(0), planetMass, Color.BLANCHEDALMOND.getHue()));
 			planets.add(planet);
 
 //			double lagrangeOrbitRadius = orbitRadius * Math.pow(planetMass / (3.0*centralMass), 1.0/3.0);
 //			System.out.println(lagrangeOrbitRadius);
-//			planets.add(new NamedPlanet("L1", createOrbitingPlanet(central, orbitRadius - lagrangeOrbitRadius, Math.toRadians(0), 0, Color.MAGENTA.getHue())));
-//			planets.add(new NamedPlanet("L2", createOrbitingPlanet(central, orbitRadius + lagrangeOrbitRadius, Math.toRadians(0), 0, Color.CORAL.getHue())));
+//			planets.add(new Planet("L1", createOrbitingPlanet(central, orbitRadius - lagrangeOrbitRadius, Math.toRadians(0), 0, Color.MAGENTA.getHue())));
+//			planets.add(new Planet("L2", createOrbitingPlanet(central, orbitRadius + lagrangeOrbitRadius, Math.toRadians(0), 0, Color.CORAL.getHue())));
 			
-			planets.add(new NamedPlanet("L3", createOrbitingPlanet(central, orbitRadius, Math.toRadians(180), 0, Color.LIGHTBLUE.getHue())));
-			planets.add(new NamedPlanet("L4", createOrbitingPlanet(central, orbitRadius, Math.toRadians(60), 0, Color.RED.getHue())));
-			planets.add(new NamedPlanet("L5", createOrbitingPlanet(central, orbitRadius, Math.toRadians(-60), 0, Color.GREEN.getHue())));
+			planets.add(new Planet("L3", createOrbitingPlanet(central, orbitRadius, Math.toRadians(180), 0, Color.LIGHTBLUE.getHue())));
+			planets.add(new Planet("L4", createOrbitingPlanet(central, orbitRadius, Math.toRadians(60), 0, Color.RED.getHue())));
+			planets.add(new Planet("L5", createOrbitingPlanet(central, orbitRadius, Math.toRadians(-60), 0, Color.GREEN.getHue())));
 
 			return planets;
 		});

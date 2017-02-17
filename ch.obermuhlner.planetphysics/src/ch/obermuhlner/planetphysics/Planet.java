@@ -9,6 +9,7 @@ public class Planet {
 
 	public static final int DEFAULT_TAIL_LENGTH = 0;
 	
+	private String name;
 	private Vector2 position;
 	private Vector2 speed;
 	private double mass;
@@ -20,6 +21,15 @@ public class Planet {
 	public List<Vector2> oldPositions = null;
 
 	public Planet(Vector2 position, Vector2 speed, double mass, double hue) {
+		this(null, position, speed, mass, hue);
+	}
+	
+	public Planet(String name, Planet planet) {
+		this(name, planet.position, planet.speed, planet.mass, planet.hue);
+	}
+
+	public Planet(String name, Vector2 position, Vector2 speed, double mass, double hue) {
+		this.name = name;
 		this.position = position;
 		this.speed = speed;
 		this.mass = mass;
@@ -96,7 +106,7 @@ public class Planet {
 	}
 
 	public String getName() {
-		return null;
+		return name;
 	}
 	
 	@Override
