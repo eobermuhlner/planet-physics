@@ -120,7 +120,9 @@ public class PlanetsSimulationApp extends Application {
 			Planet central = new Planet(Vector2.of(0, 0), Vector2.of(0, 0), 1000.0, Color.YELLOW.getHue());
 			planets.add(central);
 
-			planets.add(createOrbitingPlanet(central, 1500, 10, Color.BLANCHEDALMOND.getHue()));
+			planets.add(createOrbitingPlanet(central, 200, 0.1, Color.LIGHTBLUE.getHue()));
+			planets.add(createOrbitingPlanet(central, 500, 0.2, Color.BLANCHEDALMOND.getHue()));
+			planets.add(createOrbitingPlanet(central, 800, 0.1, Color.LIGHTGREEN.getHue()));
 			
 			planets.addAll(createAsteroids(central, 10000, 0.0));
 
