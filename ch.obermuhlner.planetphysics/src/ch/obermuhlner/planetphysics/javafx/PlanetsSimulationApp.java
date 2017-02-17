@@ -49,6 +49,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
@@ -334,98 +335,128 @@ public class PlanetsSimulationApp extends Application {
         toolbarFlowPane.setHgap(4);
         toolbarFlowPane.setVgap(4);
 
-        Button newButton = new Button("New...");
-        toolbarFlowPane.getChildren().add(newButton);
-        newButton.addEventHandler(ActionEvent.ACTION, event -> {
-        	showScenarioChoice();
-        });
+        {
+	        VBox box = new VBox(4);
+	        toolbarFlowPane.getChildren().add(box);
+	        
+	        Button newButton = new Button("New...");
+	        box.getChildren().add(newButton);
+	        newButton.addEventHandler(ActionEvent.ACTION, event -> {
+	        	showScenarioChoice();
+	        });
+        }
         
-        Button runButton = new Button("Run");
-        Button stopButton = new Button("Stop");
-        Button stepButton = new Button("Step");
-
-        updateRunButtons(runButton, stopButton, stepButton, simulationTimeline.getStatus() == Status.RUNNING);
-
-        toolbarFlowPane.getChildren().add(runButton);
-        runButton.addEventHandler(ActionEvent.ACTION, event -> {
-            simulationTimeline.play();
-            updateRunButtons(runButton, stopButton, stepButton, true);
-        });
-
-        toolbarFlowPane.getChildren().add(stopButton);
-        stopButton.addEventHandler(ActionEvent.ACTION, event -> {
-            simulationTimeline.stop();
-            updateRunButtons(runButton, stopButton, stepButton, false);
-        });
-
-        toolbarFlowPane.getChildren().add(stepButton);
-        stepButton.addEventHandler(ActionEvent.ACTION, event -> {
-        	simulateStep();
-    		drawSimulator();
-        });
+        {
+	        VBox box = new VBox(4);
+	        toolbarFlowPane.getChildren().add(box);
+	        
+	        Button runButton = new Button("Run");
+	        Button stopButton = new Button("Stop");
+	        Button stepButton = new Button("Step");
+	
+	        updateRunButtons(runButton, stopButton, stepButton, simulationTimeline.getStatus() == Status.RUNNING);
+	
+	        box.getChildren().add(runButton);
+	        runButton.addEventHandler(ActionEvent.ACTION, event -> {
+	            simulationTimeline.play();
+	            updateRunButtons(runButton, stopButton, stepButton, true);
+	        });
+	
+	        box.getChildren().add(stopButton);
+	        stopButton.addEventHandler(ActionEvent.ACTION, event -> {
+	            simulationTimeline.stop();
+	            updateRunButtons(runButton, stopButton, stepButton, false);
+	        });
+	
+	        box.getChildren().add(stepButton);
+	        stepButton.addEventHandler(ActionEvent.ACTION, event -> {
+	        	simulateStep();
+	    		drawSimulator();
+	        });
+        }
         
-        toolbarFlowPane.getChildren().add(new Label("Zoom:"));
-        Slider zoomSlider = new Slider(-2.0, 2.0, 0.0);
-        zoomSlider.setShowTickMarks(true);
-        zoomSlider.setShowTickLabels(true);
-        zoomSlider.setMajorTickUnit(1.0f);
-        toolbarFlowPane.getChildren().add(zoomSlider);
-        Bindings.bindBidirectional(zoomProperty, zoomSlider.valueProperty());
-        zoomSlider.valueProperty().addListener(event -> {
-    		drawSimulator();
-        });
-
-        CheckBox collisionsCheckBox = new CheckBox("Collisions");
-        toolbarFlowPane.getChildren().add(collisionsCheckBox);
-        Bindings.bindBidirectional(collisionsCheckBox.selectedProperty(), collisionsProperty);
+        {
+	        VBox box = new VBox(4);
+	        toolbarFlowPane.getChildren().add(box);
+	        
+	        box.getChildren().add(new Label("Zoom:"));
+	        Slider zoomSlider = new Slider(-2.0, 2.0, 0.0);
+	        zoomSlider.setShowTickMarks(true);
+	        zoomSlider.setShowTickLabels(true);
+	        zoomSlider.setMajorTickUnit(1.0f);
+	        box.getChildren().add(zoomSlider);
+	        Bindings.bindBidirectional(zoomProperty, zoomSlider.valueProperty());
+	        zoomSlider.valueProperty().addListener(event -> {
+	    		drawSimulator();
+	        });
+        }
         
-        toolbarFlowPane.getChildren().add(new Label("Time Step:"));
-        Slider deltaTimeSlider = new Slider(0.0, 5.0, 1.0);
-        deltaTimeSlider.setShowTickMarks(true);
-        deltaTimeSlider.setShowTickLabels(true);
-        deltaTimeSlider.setMajorTickUnit(1.0f);
-        toolbarFlowPane.getChildren().add(deltaTimeSlider);
-        Bindings.bindBidirectional(deltaTimeProperty, deltaTimeSlider.valueProperty());
+        {
+	        VBox box = new VBox(4);
+	        toolbarFlowPane.getChildren().add(box);
+	        
+	        box.getChildren().add(new Label("Time Step:"));
+	        Slider deltaTimeSlider = new Slider(0.0, 5.0, 1.0);
+	        deltaTimeSlider.setShowTickMarks(true);
+	        deltaTimeSlider.setShowTickLabels(true);
+	        deltaTimeSlider.setMajorTickUnit(1.0f);
+	        box.getChildren().add(deltaTimeSlider);
+	        Bindings.bindBidirectional(deltaTimeProperty, deltaTimeSlider.valueProperty());
 
+	        CheckBox collisionsCheckBox = new CheckBox("Collisions");
+	        box.getChildren().add(collisionsCheckBox);
+	        Bindings.bindBidirectional(collisionsCheckBox.selectedProperty(), collisionsProperty);
+        }
 
-        toolbarFlowPane.getChildren().add(new Label("Tail:"));
-        CheckBox tailAutoCheckBox = new CheckBox("Auto");
-        toolbarFlowPane.getChildren().add(tailAutoCheckBox);
-        Bindings.bindBidirectional(tailAutoProperty, tailAutoCheckBox.selectedProperty());
-        tailAutoCheckBox.setSelected(true);
-
-        Slider tailLengthSlider = new Slider(0.0, 100.0, 0.0);
-        tailLengthSlider.setShowTickMarks(true);
-        tailLengthSlider.setShowTickLabels(true);
-        tailLengthSlider.setMajorTickUnit(10f);
-        toolbarFlowPane.getChildren().add(tailLengthSlider);
-        Bindings.bindBidirectional(tailLengthProperty, tailLengthSlider.valueProperty());
-        tailLengthSlider.disableProperty().bind(tailAutoCheckBox.selectedProperty());
+        {
+	        VBox box = new VBox(4);
+	        toolbarFlowPane.getChildren().add(box);
+	        
+	        box.getChildren().add(new Label("Tail:"));
+	        CheckBox tailAutoCheckBox = new CheckBox("Auto");
+	        box.getChildren().add(tailAutoCheckBox);
+	        Bindings.bindBidirectional(tailAutoProperty, tailAutoCheckBox.selectedProperty());
+	        tailAutoCheckBox.setSelected(true);
+	
+	        Slider tailLengthSlider = new Slider(0.0, 100.0, 0.0);
+	        tailLengthSlider.setShowTickMarks(true);
+	        tailLengthSlider.setShowTickLabels(true);
+	        tailLengthSlider.setMajorTickUnit(10f);
+	        box.getChildren().add(tailLengthSlider);
+	        Bindings.bindBidirectional(tailLengthProperty, tailLengthSlider.valueProperty());
+	        tailLengthSlider.disableProperty().bind(tailAutoCheckBox.selectedProperty());
+	        
+	        CheckBox tailWeightlessCheckBox = new CheckBox("Weightless");
+	        box.getChildren().add(tailWeightlessCheckBox);
+	        Bindings.bindBidirectional(tailWeightlessProperty, tailWeightlessCheckBox.selectedProperty());
+        }
         
-        CheckBox tailWeightlessCheckBox = new CheckBox("Weightless");
-        toolbarFlowPane.getChildren().add(tailWeightlessCheckBox);
-        Bindings.bindBidirectional(tailWeightlessProperty, tailWeightlessCheckBox.selectedProperty());
+        {
+	        GridPane gridPane = new GridPane();
+	        toolbarFlowPane.getChildren().add(gridPane);
+	        
+	        int rowIndex = 0;
+	        
+	        gridPane.add(new Label("Step:"), 0, rowIndex);
+	        Label stepLabel = new Label("0");
+	        gridPane.add(stepLabel, 1, rowIndex++);
+	        Bindings.bindBidirectional(stepLabel.textProperty(), simulationStepProperty, SIMULATION_INTEGER_FORMAT);
 
-        toolbarFlowPane.getChildren().add(new Label("Step:"));
-        Label stepLabel = new Label("0");
-        toolbarFlowPane.getChildren().add(stepLabel);
-        Bindings.bindBidirectional(stepLabel.textProperty(), simulationStepProperty, SIMULATION_INTEGER_FORMAT);
+	        gridPane.add(new Label("Time:"), 0, rowIndex);
+	        Label timeLabel = new Label("0");
+	        gridPane.add(timeLabel, 1, rowIndex++);
+	        Bindings.bindBidirectional(timeLabel.textProperty(), simulationTimeProperty, SIMULATION_TIME_FORMAT);
+        
+	        gridPane.add(new Label("Planets:"), 0, rowIndex);
+	        Label planetCountLabel = new Label("0");
+	        gridPane.add(planetCountLabel, 1, rowIndex++);
+	        Bindings.bindBidirectional(planetCountLabel.textProperty(), simulationPlanetCountProperty, SIMULATION_INTEGER_FORMAT);
 
-        toolbarFlowPane.getChildren().add(new Label("Time:"));
-        Label timeLabel = new Label("0");
-        toolbarFlowPane.getChildren().add(timeLabel);
-        Bindings.bindBidirectional(timeLabel.textProperty(), simulationTimeProperty, SIMULATION_TIME_FORMAT);
-
-        toolbarFlowPane.getChildren().add(new Label("Planets:"));
-        Label planetCountLabel = new Label("0");
-        toolbarFlowPane.getChildren().add(planetCountLabel);
-        Bindings.bindBidirectional(planetCountLabel.textProperty(), simulationPlanetCountProperty, SIMULATION_INTEGER_FORMAT);
-
-        toolbarFlowPane.getChildren().add(new Label("Weightless:"));
-        Label planetWeightlessCountLabel = new Label("0");
-        toolbarFlowPane.getChildren().add(planetWeightlessCountLabel);
-        Bindings.bindBidirectional(planetWeightlessCountLabel.textProperty(), simulationWeightlessPlanetCountProperty, SIMULATION_INTEGER_FORMAT);
-
+	        gridPane.add(new Label("Weightless:"), 0, rowIndex);
+	        Label planetWeightlessCountLabel = new Label("0");
+	        gridPane.add(planetWeightlessCountLabel, 1, rowIndex++);
+	        Bindings.bindBidirectional(planetWeightlessCountLabel.textProperty(), simulationWeightlessPlanetCountProperty, SIMULATION_INTEGER_FORMAT);
+        }
 
         return toolbarFlowPane;
 	}
@@ -652,9 +683,11 @@ public class PlanetsSimulationApp extends Application {
 		
 		int planetCount = simulation.getPlanets().size();
 		simulationPlanetCountProperty.set(planetCount);
+		
+		int weightlessPlanetCount = simulation.getWeightlessPlanets().size();
+		simulationWeightlessPlanetCountProperty.set(weightlessPlanetCount);
+
 		if (tailWeightlessProperty.get()) {
-			int weightlessPlanetCount = simulation.getWeightlessPlanets().size();
-			simulationWeightlessPlanetCountProperty.set(weightlessPlanetCount);
 			planetCount += weightlessPlanetCount;
 		}
 		if (tailAutoProperty.get()) {
