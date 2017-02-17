@@ -223,6 +223,7 @@ public class PlanetsSimulationApp extends Application {
 	private DoubleProperty simulationTimeProperty = new SimpleDoubleProperty(0);
 	private IntegerProperty simulationPlanetCountProperty = new SimpleIntegerProperty(0);
 	private IntegerProperty simulationWeightlessPlanetCountProperty = new SimpleIntegerProperty(0);
+	private DoubleProperty simulationElapsedTimeProperty = new SimpleDoubleProperty(0);
 	
 	private DoubleProperty planetPositionXProperty = new SimpleDoubleProperty();
 	private DoubleProperty planetPositionYProperty = new SimpleDoubleProperty();
@@ -439,12 +440,12 @@ public class PlanetsSimulationApp extends Application {
 	        
 	        int rowIndex = 0;
 	        
-	        gridPane.add(new Label("Step:"), 0, rowIndex);
+	        gridPane.add(new Label("Simulated Step:"), 0, rowIndex);
 	        Label stepLabel = new Label("0");
 	        gridPane.add(stepLabel, 1, rowIndex++);
 	        Bindings.bindBidirectional(stepLabel.textProperty(), simulationStepProperty, SIMULATION_INTEGER_FORMAT);
 
-	        gridPane.add(new Label("Time:"), 0, rowIndex);
+	        gridPane.add(new Label("Simulated Time:"), 0, rowIndex);
 	        Label timeLabel = new Label("0");
 	        gridPane.add(timeLabel, 1, rowIndex++);
 	        Bindings.bindBidirectional(timeLabel.textProperty(), simulationTimeProperty, SIMULATION_TIME_FORMAT);
@@ -458,6 +459,12 @@ public class PlanetsSimulationApp extends Application {
 	        Label planetWeightlessCountLabel = new Label("0");
 	        gridPane.add(planetWeightlessCountLabel, 1, rowIndex++);
 	        Bindings.bindBidirectional(planetWeightlessCountLabel.textProperty(), simulationWeightlessPlanetCountProperty, SIMULATION_INTEGER_FORMAT);
+
+	        gridPane.add(new Label("Elapsed Time [ms]:"), 0, rowIndex);
+	        Label elapsedTimeLabel = new Label("0");
+	        gridPane.add(elapsedTimeLabel, 1, rowIndex++);
+	        Bindings.bindBidirectional(elapsedTimeLabel.textProperty(), simulationElapsedTimeProperty, SIMULATION_TIME_FORMAT);
+        
         }
 
         return toolbarFlowPane;
@@ -678,7 +685,11 @@ public class PlanetsSimulationApp extends Application {
 	}
 
 	private void simulateStep() {
+		long startMillis = System.currentTimeMillis();
 		simulation.simulateStep(deltaTimeProperty.get(), tailLengthProperty.get());
+		long endMillis = System.currentTimeMillis();
+		
+		simulationElapsedTimeProperty.set(endMillis - startMillis);
 		
 		simulationStepProperty.set(simulationStepProperty.get() + 1);
 		simulationTimeProperty.set(simulationTimeProperty.get() + deltaTimeProperty.get());
