@@ -156,9 +156,9 @@ public class PlanetsSimulationApp extends Application {
 		SCENARIOS.put("Early Solar System", () -> {
 			List<Planet> planets = new ArrayList<>();
 			
-			Planet central = new Planet(Vector2.of(0, 0), Vector2.of(0, 0), 10.0, Color.YELLOW.getHue());
+			Planet central = new Planet(Vector2.of(0, 0), Vector2.of(0, 0), 50.0, Color.YELLOW.getHue());
 			planets.add(central);
-			planets.addAll(createAsteroids(central, 1000, 0.1, 1, 500));
+			planets.addAll(createAsteroids(central, 1000, 0.01, 10, 500));
 
 			return planets;
 		});
