@@ -40,6 +40,10 @@ public class Planet {
 	public void merge(Planet other) {
 		other.deleted = true;
 		
+		if (name == null) {
+			name = other.name;
+		}
+		name = mass > other.mass ? name : other.name;
 		hue = mass > other.mass ? hue : other.hue;
 		speed = speed.multiply(mass).add(other.speed.multiply(other.mass)).divide(mass + other.mass);
 		mass += other.mass;
