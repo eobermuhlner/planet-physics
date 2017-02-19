@@ -195,6 +195,35 @@ public class PlanetsSimulationApp extends Application {
 			return planets;
 		});
 
+		SCENARIOS.put("Random Solar System", () -> {
+			List<Planet> planets = new ArrayList<>();
+
+			Planet central = new Planet("Sun", Vector2.of(0, 0), Vector2.of(0, 0), random(100.0, 1000.0), Color.YELLOW.getHue());
+			planets.add(central);
+
+			double planetOrbit = 150;
+			int planetCount = (int) random(5, 12);
+			for (int planetIndex = 0; planetIndex < planetCount; planetIndex++) {
+				if (random(0, 100) <= 10) {
+					planets.addAll(createAsteroids(central, 200, 0.0, planetOrbit, planetOrbit * 1.1, random(0, 360)));
+				} else {
+					Planet planet = new Planet("Planet" + (planetIndex+1), createOrbitingPlanet(central, planetOrbit, random(1, 5), random(0, 360)));
+					planets.add(planet);
+					
+					int moonCount = (int) random(0, 3);
+					double moonOrbit = 12;
+					for (int moonIndex = 0; moonIndex < moonCount; moonIndex++) {
+						Planet moon = new Planet(null, createOrbitingPlanet(planet, moonOrbit, random(0.001, 0.01), random(0, 360)));
+						planets.add(moon);
+						moonOrbit += random(5, 8);
+					}
+				}
+				
+				planetOrbit = planetOrbit * random(1.4, 1.8);
+			}
+
+			return planets;
+		});
 		SCENARIOS.put("Random 10", () -> {
 			return createRandomPlanets(10, 100, 1.0);
 		});
