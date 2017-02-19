@@ -347,8 +347,8 @@ public class PlanetsSimulationApp extends Application {
 			lastMouseDragX = event.getX();
 			lastMouseDragY = event.getY();
 			
-			translateX += deltaX;
-			translateY += deltaY;
+			addTranslation(deltaX, deltaY);
+			drawSimulator();
 		});
 		simulationCanvas.setOnMouseReleased(event -> {
 			double deltaX = event.getX() - lastMouseDragX;
@@ -356,8 +356,8 @@ public class PlanetsSimulationApp extends Application {
 			lastMouseDragX = event.getX();
 			lastMouseDragY = event.getY();
 			
-			translateX += deltaX;
-			translateY += deltaY;
+			addTranslation(deltaX, deltaY);
+			drawSimulator();
 		});
 	}
 
@@ -700,16 +700,22 @@ public class PlanetsSimulationApp extends Application {
 
 	private double toScreenX(double x) {
 		double zoomFactor = Math.pow(10.0, zoomProperty.get());
-		return x / zoomFactor + simulationCanvas.getWidth() / 2 + translateX;
+		return (x + translateX) / zoomFactor + simulationCanvas.getWidth() / 2 ;
 	}
 
 	private double toScreenY(double y) {
 		double zoomFactor = Math.pow(10.0, zoomProperty.get());
-		return y / zoomFactor + simulationCanvas.getHeight() / 2  + translateY;
+		return (y + translateY) / zoomFactor + simulationCanvas.getHeight() / 2;
 	}
 
 	private double toScreenPixels(double x) {
 		return Math.max(x, 1);
+	}
+	
+	private void addTranslation(double x, double y) {
+		double zoomFactor = Math.pow(10.0, zoomProperty.get());
+		translateX += x * zoomFactor;
+		translateY += y * zoomFactor;
 	}
 
 	private void simulateStep() {
