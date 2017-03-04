@@ -221,6 +221,10 @@ public class PlanetsSimulationApp extends Application {
 				
 				planetOrbit = planetOrbit * random(1.4, 1.8);
 			}
+			
+			// oort cloud
+			planets.addAll(createAsteroids(central, 200, 0.0, planetOrbit, planetOrbit * 1.3, random(0, 360)));
+
 
 			return planets;
 		});
